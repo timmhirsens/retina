@@ -1,11 +1,7 @@
-// SPDX-License-Identifier: Apache-2.0
-// Copyright Authors of Retina and Cilium
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 
-// NOTE: this file was originally a modified/slimmed-down version of Cilium's operator
-// to provide Retina with a hive to run Cilium's garbage collection Cells.
-// Now, it contains Retina-related code ported into Cells.
-
-package cmd
+package hubble
 
 import (
 	"context"

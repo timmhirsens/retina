@@ -1,10 +1,7 @@
-// SPDX-License-Identifier: Apache-2.0
-// Copyright Authors of Retina and Cilium
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 
-// NOTE: separated the cells from root.go into this file.
-// See other note in root.go for modification info.
-
-package cmd
+package hubble
 
 import (
 	"context"

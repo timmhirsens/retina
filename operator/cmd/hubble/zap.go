@@ -1,4 +1,7 @@
-package cmd
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
+package hubble
 
 import (
 	"io"

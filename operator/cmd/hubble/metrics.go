@@ -1,9 +1,7 @@
-// SPDX-License-Identifier: Apache-2.0
-// Copyright Authors of Retina and Cilium
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 
-// NOTE: changed to say networkobservability_operator
-
-package cmd
+package hubble
 
 import (
 	"github.com/spf13/cobra"
