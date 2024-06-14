@@ -5,7 +5,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cilium/cilium/pkg/hive"
 	"github.com/cilium/cilium/pkg/hive/cell"
 	"github.com/microsoft/retina/pkg/telemetry"
 	"github.com/sirupsen/logrus"
@@ -72,15 +71,15 @@ var (
 		"heartbeat",
 		"sends periodic telemetry heartbeat",
 		cell.Invoke(
-			func(tel telemetry.Telemetry, lifecycle hive.Lifecycle, l logrus.FieldLogger) {
+			func(tel telemetry.Telemetry, lifecycle cell.Lifecycle, l logrus.FieldLogger) {
 				ctx, cancelCtx := context.WithCancel(context.Background())
-				lifecycle.Append(hive.Hook{
-					OnStart: func(hive.HookContext) error {
+				lifecycle.Append(cell.Hook{
+					OnStart: func(cell.HookContext) error {
 						l.Info("starting periodic heartbeat")
 						go tel.Heartbeat(ctx, heartbeatInterval)
 						return nil
 					},
-					OnStop: func(hive.HookContext) error {
+					OnStop: func(cell.HookContext) error {
 						cancelCtx()
 						return nil
 					},

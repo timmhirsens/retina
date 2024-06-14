@@ -20,7 +20,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
-	"github.com/cilium/cilium/pkg/hive"
 	"github.com/cilium/cilium/pkg/hive/cell"
 	"github.com/cilium/cilium/pkg/k8s"
 	ciliumv2 "github.com/cilium/cilium/pkg/k8s/apis/cilium.io/v2"
@@ -78,7 +77,7 @@ type params struct {
 	cell.In
 
 	Logger          logrus.FieldLogger
-	Lifecycle       hive.Lifecycle
+	Lifecycle       cell.Lifecycle
 	Clientset       k8sClient.Clientset
 	CiliumEndpoints resource.Resource[*ciliumv2.CiliumEndpoint]
 	Namespaces      resource.Resource[*slim_corev1.Namespace]
@@ -107,7 +106,7 @@ func registerEndpointController(p params) error {
 	return nil
 }
 
-func (r *endpointReconciler) Start(ctx hive.HookContext) error {
+func (r *endpointReconciler) Start(ctx cell.HookContext) error {
 	// NOTE: we must create IdentityManager on leader election since its allocator auto-starts on creation.
 	// There is a way to disable auto-start but then there is no exposed function to simply start().
 	im, err := NewIdentityManager(r.l, r.clientset)
@@ -131,7 +130,7 @@ func (r *endpointReconciler) Start(ctx hive.HookContext) error {
 	return nil
 }
 
-func (r *endpointReconciler) Stop(ctx hive.HookContext) error {
+func (r *endpointReconciler) Stop(ctx cell.HookContext) error {
 	if err := r.wp.Close(); err != nil {
 		return errors.Wrap(err, "failed to stop endpoint workerpool")
 	}

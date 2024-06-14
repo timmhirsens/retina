@@ -6,21 +6,21 @@ package hubble
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"path/filepath"
 
 	"os"
 	"sync"
 
 	operatorOption "github.com/cilium/cilium/operator/option"
-	"github.com/cilium/cilium/pkg/components"
 	"github.com/cilium/cilium/pkg/hive"
+	"github.com/cilium/cilium/pkg/hive/cell"
 	k8sClient "github.com/cilium/cilium/pkg/k8s/client"
 	k8sversion "github.com/cilium/cilium/pkg/k8s/version"
 	"github.com/cilium/cilium/pkg/logging"
 	"github.com/cilium/cilium/pkg/logging/logfields"
 	"github.com/cilium/cilium/pkg/metrics"
 	"github.com/cilium/cilium/pkg/option"
-	"github.com/cilium/cilium/pkg/rand"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -94,10 +94,10 @@ func Execute(cmd *cobra.Command) {
 	}
 }
 
-func registerOperatorHooks(l logrus.FieldLogger, lc hive.Lifecycle, llc *LeaderLifecycle, clientset k8sClient.Clientset, shutdowner hive.Shutdowner) {
+func registerOperatorHooks(l logrus.FieldLogger, lc cell.Lifecycle, llc *LeaderLifecycle, clientset k8sClient.Clientset, shutdowner hive.Shutdowner) {
 	var wg sync.WaitGroup
-	lc.Append(hive.Hook{
-		OnStart: func(hive.HookContext) error {
+	lc.Append(cell.Hook{
+		OnStart: func(cell.HookContext) error {
 			wg.Add(1)
 			go func() {
 				runOperator(l, llc, clientset, shutdowner)
@@ -105,7 +105,7 @@ func registerOperatorHooks(l logrus.FieldLogger, lc hive.Lifecycle, llc *LeaderL
 			}()
 			return nil
 		},
-		OnStop: func(ctx hive.HookContext) error {
+		OnStop: func(ctx cell.HookContext) error {
 			if err := llc.Stop(ctx); err != nil {
 				return errors.Wrap(err, "failed to stop operator")
 			}
@@ -127,7 +127,7 @@ func initEnv(vp *viper.Viper) {
 	operatorOption.Config.Populate(vp)
 
 	// add hooks after setting up metrics in the option.Confog
-	logging.DefaultLogger.Hooks.Add(metrics.NewLoggingHook(components.CiliumOperatortName))
+	logging.DefaultLogger.Hooks.Add(metrics.NewLoggingHook())
 
 	// Logging should always be bootstrapped first. Do not add any code above this!
 	if err := logging.SetupLogging(option.Config.LogDriver, logging.LogOptions(option.Config.LogOpt), binaryName, option.Config.Debug); err != nil {
@@ -172,7 +172,7 @@ func runOperator(l logrus.FieldLogger, lc *LeaderLifecycle, clientset k8sClient.
 	if err != nil {
 		l.WithError(err).Fatal("Failed to get hostname when generating lease lock identity")
 	}
-	operatorID = rand.RandomStringWithPrefix(operatorID+"-", 10)
+	operatorID = randomStringWithPrefix(operatorID+"-", 10)
 
 	leResourceLock, err := resourcelock.NewFromKubeconfig(
 		resourcelock.LeasesResourceLock,
@@ -224,4 +224,16 @@ func runOperator(l logrus.FieldLogger, lc *LeaderLifecycle, clientset k8sClient.
 			},
 		},
 	})
+}
+
+// RandomStringWithPrefix returns a random string of length n + len(prefix) with
+// the given prefix, containing upper- and lowercase runes.
+// borrowed from https://stackoverflow.com/questions/22892120/how-to-generate-a-random-string-of-a-fixed-length-in-go
+func randomStringWithPrefix(prefix string, n int) string {
+	const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	bytes := make([]byte, n)
+	for i := range bytes {
+		bytes[i] = letters[rand.Intn(len(letters))]
+	}
+	return prefix + string(bytes)
 }
