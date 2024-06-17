@@ -6,7 +6,7 @@ require (
 	github.com/go-chi/chi/v5 v5.0.11
 	github.com/google/uuid v1.6.0
 	github.com/prometheus/client_golang v1.19.1
-	github.com/spf13/cobra v1.8.0
+	github.com/spf13/cobra v1.8.1
 	go.uber.org/zap v1.26.0
 	k8s.io/client-go v0.30.1
 )
@@ -295,8 +295,8 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_model v0.6.1
 	github.com/prometheus/common v0.54.0
-	github.com/safchain/ethtool v0.3.0
 	github.com/sirupsen/logrus v1.9.3
+	github.com/safchain/ethtool v0.4.0
 	github.com/spf13/viper v1.19.0
 	github.com/vishvananda/netlink v1.2.1-beta.2.0.20240524165444-4d4ba1473f21
 	go.opentelemetry.io/otel v1.27.0
@@ -307,7 +307,7 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gotest.tools v2.2.0+incompatible
 	gotest.tools/v3 v3.5.1
-	helm.sh/helm/v3 v3.15.1
+	helm.sh/helm/v3 v3.15.2
 	k8s.io/apiextensions-apiserver v0.30.1
 	k8s.io/cli-runtime v0.30.1
 	k8s.io/kubectl v0.30.1
