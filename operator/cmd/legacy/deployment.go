@@ -16,7 +16,6 @@ import (
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
 
-	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	apiextv1 "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/typed/apiextensions/v1"
 	k8sruntime "k8s.io/apimachinery/pkg/runtime"
@@ -64,9 +63,45 @@ func init() {
 	//+kubebuilder:scaffold:scheme
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 	utilruntime.Must(retinav1alpha1.AddToScheme(scheme))
+}
+
+type Operator struct {
+	metricsAddr          string
+	probeAddr            string
+	enableLeaderElection bool
+	configFile           string
+}
+
+func NewOperator(metricsAddr, probeAddr, configFile string, enableLeaderElection bool) *Operator {
+	return &Operator{
+		metricsAddr:          metricsAddr,
+		probeAddr:            probeAddr,
+		enableLeaderElection: enableLeaderElection,
+		configFile:           configFile,
+	}
+}
+
+func (o *Operator) Start() {
+	mainLogger = log.Logger().Named("main")
+
+	mainLogger.Sugar().Infof("Starting legacy operator %s", version)
+
+	opts := &crzap.Options{
+		Development: false,
+	}
 
 	var err error
-	oconfig, err = LoadConfig()
+	oconfig, err = config.GetConfig(o.configFile)
+	if err != nil {
+		panic(err)
+	}
+
+	mainLogger.Sugar().Infof("Operator configuration", zap.Any("configuration", oconfig))
+
+	// Set Capture config
+	oconfig.CaptureConfig.CaptureImageVersion = version
+	oconfig.CaptureConfig.CaptureImageVersionSource = captureUtils.VersionSourceOperatorImageVersion
+
 	if err != nil {
 		fmt.Printf("failed to load config with err %s", err.Error())
 		os.Exit(1)
@@ -76,30 +111,6 @@ func init() {
 	if err != nil {
 		fmt.Printf("failed to initialize logging with err %s", err.Error())
 		os.Exit(1)
-	}
-	mainLogger = log.Logger().Named("main")
-}
-
-type Operator struct {
-	metricsAddr          string
-	probeAddr            string
-	enableLeaderElection bool
-}
-
-func NewOperator(metricsAddr, probeAddr string, enableLeaderElection bool) *Operator {
-	return &Operator{
-		metricsAddr:          metricsAddr,
-		probeAddr:            probeAddr,
-		enableLeaderElection: enableLeaderElection,
-	}
-}
-
-func (o *Operator) Start() {
-	mainLogger.Sugar().Infof("Starting legacy operator %s", version)
-	mainLogger.Sugar().Infof("Operator configuration", zap.Any("configuration", oconfig))
-
-	opts := &crzap.Options{
-		Development: false,
 	}
 
 	ctrl.SetLogger(crzap.New(crzap.UseFlagOptions(opts), crzap.Encoder(zapcore.NewConsoleEncoder(log.EncoderConfig()))))
@@ -233,29 +244,6 @@ func (o *Operator) Start() {
 
 	// start heartbeat goroutine for application insights
 	go tel.Heartbeat(ctx, 5*time.Minute)
-}
-
-func LoadConfig() (*config.OperatorConfig, error) {
-	viper.SetConfigType("yaml")
-	viper.SetConfigFile("retina/operator-config.yaml")
-	err := viper.ReadInConfig()
-	if err != nil {
-		return nil, err
-	}
-
-	viper.AutomaticEnv()
-
-	var config config.OperatorConfig
-
-	// Check pkg/config/config.go for the explanation of setting EnableRetinaEndpoint defaults to true.
-	viper.SetDefault("EnableRetinaEndpoint", true)
-	err = viper.Unmarshal(&config)
-
-	// Set Capture config
-	config.CaptureConfig.CaptureImageVersion = version
-	config.CaptureConfig.CaptureImageVersionSource = captureUtils.VersionSourceOperatorImageVersion
-
-	return &config, err
 }
 
 func EnablePProf() {

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-package operator
+package main
 
 import "github.com/microsoft/retina/operator/cmd"
 

@@ -5,7 +5,6 @@ package hubble
 
 import (
 	"context"
-	"fmt"
 	"math/rand"
 	"path/filepath"
 
@@ -39,58 +38,13 @@ var (
 	logger     = logging.DefaultLogger.WithField(logfields.LogSubsys, binaryName)
 )
 
-func NewOperatorCmd(h *hive.Hive) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   binaryName,
-		Short: "Run " + binaryName,
-		Run: func(cobraCmd *cobra.Command, args []string) {
-			cmdRefDir := h.Viper().GetString(option.CMDRef)
-			if cmdRefDir != "" {
-				genMarkdown(cobraCmd, cmdRefDir)
-				os.Exit(0)
-			}
+func Execute(cmd *cobra.Command, h *hive.Hive) {
+	fn := option.InitConfig(cmd, "Retina-Operator", "retina-operators", h.Viper())
+	fn()
+	initEnv(h.Viper())
 
-			initEnv(h.Viper())
-
-			if err := h.Run(); err != nil {
-				logger.Fatal(err)
-			}
-		},
-	}
-
-	h.RegisterFlags(cmd.Flags())
-
-	// Enable fallback to direct API probing to check for support of Leases in
-	// case Discovery API fails.
-	h.Viper().Set(option.K8sEnableAPIDiscovery, true)
-
-	// Overwrite the metrics namespace with the one specific for the Operator
-	metrics.Namespace = RetinaOperatorMetricsNamespace
-
-	cmd.AddCommand(
-		MetricsCmd,
-		h.Command(),
-	)
-
-	InitGlobalFlags(cmd, h.Viper())
-	// not sure where flags hooks is set
-	for _, hook := range FlagsHooks {
-		hook.RegisterProviderFlag(cmd, h.Viper())
-	}
-
-	// the Operator performs config.Populate() within initEnv() above
-	// the Daemon instead performs config.Populate() here on cobra.OnInitialize()
-	cobra.OnInitialize(
-		option.InitConfig(cmd, "Retina-Operator", "retina-operators", h.Viper()),
-	)
-
-	return cmd
-}
-
-func Execute(cmd *cobra.Command) {
-	if err := cmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+	if err := h.Run(); err != nil {
+		logger.Fatal(err)
 	}
 }
 
