@@ -5,7 +5,6 @@ package hubble
 
 import (
 	"context"
-
 	"sync/atomic"
 
 	"github.com/microsoft/retina/pkg/controllers/v2/shared/telemetry"

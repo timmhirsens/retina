@@ -3,11 +3,10 @@
 package dashboard
 
 import (
-	"testing"
 	"os"
 	"path/filepath"
-
 	"reflect"
+	"testing"
 )
 
 // TestDashboardsAreSimplified ensures that all dashboards are simplified

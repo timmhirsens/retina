@@ -22,26 +22,24 @@ const (
 	CiliumEndpointIndexIdentity = "identity"
 )
 
-var (
-	// ResourcesCell provides a set of handles to Kubernetes resources used throughout the
-	// operator. Each of the resources share a client-go informer and backing store so we only
-	// have one watch API call for each resource kind and that we maintain only one copy of each object.
-	//
-	// See pkg/k8s/resource/resource.go for documentation on the Resource[T] type.
-	ResourcesCell = cell.Module(
-		"k8s-resources",
-		"Operator Kubernetes resources",
+// ResourcesCell provides a set of handles to Kubernetes resources used throughout the
+// operator. Each of the resources share a client-go informer and backing store so we only
+// have one watch API call for each resource kind and that we maintain only one copy of each object.
+//
+// See pkg/k8s/resource/resource.go for documentation on the Resource[T] type.
+var ResourcesCell = cell.Module(
+	"k8s-resources",
+	"Operator Kubernetes resources",
 
-		cell.Config(k8s.DefaultConfig),
-		cell.Provide(
-			k8s.CiliumIdentityResource,
-			CiliumEndpointResource,
-			CiliumEndpointSliceResource,
-			k8s.CiliumNodeResource,
-			k8s.PodResource,
-			k8s.NamespaceResource,
-		),
-	)
+	cell.Config(k8s.DefaultConfig),
+	cell.Provide(
+		k8s.CiliumIdentityResource,
+		CiliumEndpointResource,
+		CiliumEndpointSliceResource,
+		k8s.CiliumNodeResource,
+		k8s.PodResource,
+		k8s.NamespaceResource,
+	),
 )
 
 // Resources is a convenience struct to group all the operator k8s resources as cell constructor parameters.

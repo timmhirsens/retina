@@ -54,7 +54,7 @@ func SimplifyGrafana(filename string, overwrite bool) map[string]interface{} {
 		log.Fatal(err)
 	}
 
-	err = os.WriteFile(filename, simplifiedData, 0644)
+	err = os.WriteFile(filename, simplifiedData, 0o644)
 	if err != nil {
 		log.Fatal(err)
 	}

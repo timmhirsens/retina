@@ -154,7 +154,6 @@ func TestPodDeleteNoOp(t *testing.T) {
 }
 
 func TestPodLabelsChanged(t *testing.T) {
-
 	r, ciliumEndpoints := newTestEndpointReconciler(t, nil)
 
 	createNamespace(r.ciliumSlimClientSet.CoreV1(), "test")
@@ -300,7 +299,6 @@ func TestPodLabelsChanged(t *testing.T) {
 	}
 	t.Logf("%+v", cep.Status.Identity.Labels)
 	require.Equal(t, expectedCEP, cep)
-
 }
 
 func TestPodNetworkingChanged(t *testing.T) {
@@ -475,7 +473,6 @@ func TestPodNetworkingChanged(t *testing.T) {
 		},
 	}
 	require.Equal(t, expectedCEPNew, cep)
-
 }
 
 func TestNamespaceDelete(t *testing.T) {
@@ -496,7 +493,6 @@ func TestNamespaceDelete(t *testing.T) {
 	// deleting namespace does not delete the endpoint in cache.
 	// we will let pod controller delete the endpoint
 	_ = getAndAssertCEPExists(t, ciliumEndpoints, pod)
-
 }
 
 func TestNamespaceUpdate(t *testing.T) {
@@ -550,31 +546,24 @@ func TestNamespaceUpdate(t *testing.T) {
 }
 
 func TestUpdateFailurePodLabelsChanged(t *testing.T) {
-
 }
 
 func TestUpdateFailurePodNetworkingChanged(t *testing.T) {
-
 }
 
 func TestBootupNoOp(t *testing.T) {
-
 }
 
 func TestBootupPodLabelsChanged(t *testing.T) {
-
 }
 
 func TestBootupPodNetworkingChanged(t *testing.T) {
-
 }
 
 func TestBootupUpdateFailurePodLabelsChanged(t *testing.T) {
-
 }
 
 func TestBootupUpdateFailurePodNetworkingChanged(t *testing.T) {
-
 }
 
 func TestPodWithoutIP(t *testing.T) {

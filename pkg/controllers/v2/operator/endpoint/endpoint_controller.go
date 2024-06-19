@@ -160,7 +160,6 @@ func (r *endpointReconciler) run(pctx context.Context) error {
 			err := r.wp.Submit("pod-event-handler", func(ctx context.Context) error {
 				return r.runEventHandler(ctx, ev)
 			})
-
 			if err != nil {
 				r.l.WithError(err).WithField("podKey", ev.Key.String()).Error("failed to submit pod event handler")
 			}

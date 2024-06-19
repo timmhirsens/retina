@@ -3,10 +3,9 @@
 package dashboard
 
 import (
-	"testing"
-
 	"os"
 	"path/filepath"
+	"testing"
 )
 
 // TestOverwriteDashboards simplifies and overwrites Grafana dashboards in this folder.

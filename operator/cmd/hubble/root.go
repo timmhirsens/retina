@@ -6,9 +6,8 @@ package hubble
 import (
 	"context"
 	"math/rand"
-	"path/filepath"
-
 	"os"
+	"path/filepath"
 	"sync"
 
 	operatorOption "github.com/cilium/cilium/operator/option"
