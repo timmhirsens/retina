@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/microsoft/retina/pkg/controllers/v2/operator/cache"
+	"github.com/microsoft/retina/pkg/controllers/operator/v2/cache"
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"

@@ -7,7 +7,7 @@ import (
 	"context"
 	"sync/atomic"
 
-	"github.com/microsoft/retina/pkg/controllers/v2/shared/telemetry"
+	"github.com/microsoft/retina/pkg/shared/telemetry"
 	"github.com/sirupsen/logrus"
 	k8sruntime "k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -20,7 +20,7 @@ import (
 	"github.com/microsoft/retina/operator/v2/config"
 	operatorK8s "github.com/microsoft/retina/operator/v2/k8s"
 	"github.com/microsoft/retina/operator/v2/k8s/apis"
-	endpointcontroller "github.com/microsoft/retina/pkg/controllers/v2/operator/endpoint"
+	endpointcontroller "github.com/microsoft/retina/pkg/controllers/operator/v2/endpoint"
 
 	"github.com/cilium/cilium/operator/auth"
 	"github.com/cilium/cilium/operator/endpointgc"

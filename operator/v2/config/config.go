@@ -4,7 +4,7 @@ import (
 	"github.com/cilium/cilium/pkg/hive/cell"
 	"github.com/spf13/pflag"
 
-	sharedconfig "github.com/microsoft/retina/pkg/controllers/v2/shared/config"
+	sharedconfig "github.com/microsoft/retina/pkg/shared/config"
 )
 
 type Config struct {

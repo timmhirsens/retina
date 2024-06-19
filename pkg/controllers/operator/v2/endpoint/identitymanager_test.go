@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	ciliumutil "github.com/microsoft/retina/pkg/controllers/v2/testutil/cilium"
+	ciliumutil "github.com/microsoft/retina/pkg/utils/testutil/cilium"
 
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
