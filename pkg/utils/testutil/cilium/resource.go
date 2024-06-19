@@ -115,3 +115,8 @@ func (r *MockResource[T]) CacheStore() cache.Store {
 	r.l.Warn("CacheStore() called but this returns nil because it's not implemented")
 	return nil
 }
+
+func (r *MockResource[T]) Release() {
+	// Implement the logic required by the Release method or leave it as a stub if it's just for testing/mocking
+	r.l.Warn("Release() called but this is a stub implementation")
+}
