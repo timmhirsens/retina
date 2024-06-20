@@ -22,7 +22,6 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
-	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	crzap "sigs.k8s.io/controller-runtime/pkg/log/zap"
@@ -46,10 +45,10 @@ var (
 	mainLogger *log.ZapLogger
 	oconfig    *config.OperatorConfig
 
-	MAX_POD_CHANNEL_BUFFER                   = 250
-	MAX_METRICS_CONFIGURATION_CHANNEL_BUFFER = 50
-	MAX_TRACES_CONFIGURATION_CHANNEL_BUFFER  = 50
-	MAX_RETINA_ENDPOINT_CHANNEL_BUFFER       = 250
+	MaxPodChannelBuffer                  = 250
+	MaxMetricsConfigurationChannelBuffer = 50
+	MaxTracesConfigurationChannelBuffer  = 50
+	MaxRetinaEndpointChannelBuffer       = 250
 
 	version = "undefined"
 
@@ -206,7 +205,7 @@ func (o *Operator) Start() {
 		if oconfig.EnableRetinaEndpoint {
 			mainLogger.Info("RetinaEndpoint is enabled")
 
-			retinaendpointchannel := make(chan cache.PodCacheObject, MAX_RETINA_ENDPOINT_CHANNEL_BUFFER)
+			retinaendpointchannel := make(chan cache.PodCacheObject, MaxRetinaEndpointChannelBuffer)
 			ke := retinaendpointcontroller.New(mgr.GetClient(), retinaendpointchannel)
 			// start reconcile the cached Pod before manager starts to not miss any events
 			go ke.ReconcilePod(ctrlCtx)
@@ -255,23 +254,27 @@ func EnablePProf() {
 	pprofmux.HandleFunc("/debug/pprof/trace", pprof.Trace)
 	pprofmux.Handle("/debug/pprof/goroutine", pprof.Handler("goroutine"))
 
-	if err := http.ListenAndServe(":8082", pprofmux); err != nil {
+	if err := http.ListenAndServe(":8082", pprofmux); err != nil { //nolint:gosec // TODO replace with secure server that supports timeout
 		panic(err)
 	}
 }
 
-func initLogging(config *config.OperatorConfig, applicationInsightsID string) error {
+func initLogging(cfg *config.OperatorConfig, applicationInsightsID string) error {
 	logOpts := &log.LogOpts{
-		Level:                 config.LogLevel,
+		Level:                 cfg.LogLevel,
 		File:                  false,
 		MaxFileSizeMB:         100,
 		MaxBackups:            3,
 		MaxAgeDays:            30,
 		ApplicationInsightsID: applicationInsightsID,
-		EnableTelemetry:       config.EnableTelemetry,
+		EnableTelemetry:       cfg.EnableTelemetry,
 	}
 
-	log.SetupZapLogger(logOpts)
+	_, err := log.SetupZapLogger(logOpts)
+	if err != nil {
+		mainLogger.Error("Failed to setup zap logger", zap.Error(err))
+		return err
+	}
 
 	return nil
 }

@@ -38,8 +38,7 @@ func CiliumEndpointResource(lc cell.Lifecycle, cs client.Clientset, opts ...func
 }
 
 func identityIndexFunc(obj interface{}) ([]string, error) {
-	switch t := obj.(type) {
-	case *cilium_api_v2.CiliumEndpoint:
+	if t, ok := obj.(*cilium_api_v2.CiliumEndpoint); ok {
 		if t.Status.Identity != nil {
 			id := strconv.FormatInt(t.Status.Identity.ID, 10)
 			return []string{id}, nil

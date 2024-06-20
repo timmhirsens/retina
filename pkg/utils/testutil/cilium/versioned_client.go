@@ -90,7 +90,7 @@ func (m *MockCiliumV2Client) CiliumEndpoints(namespace string) ciliumv2.CiliumEn
 	return NewMockEndpointClient(m.l, namespace, m.ciliumEndpoints)
 }
 
-func (m *MockCiliumV2Client) CiliumEnvoyConfigs(namespace string) ciliumv2.CiliumEnvoyConfigInterface {
+func (m *MockCiliumV2Client) CiliumEnvoyConfigs(_ string) ciliumv2.CiliumEnvoyConfigInterface {
 	m.l.Warn("MockCiliumV2Client.CiliumEnvoyConfigs() called but this returns nil because it's not implemented")
 	return nil
 }
@@ -105,12 +105,12 @@ func (m *MockCiliumV2Client) CiliumIdentities() ciliumv2.CiliumIdentityInterface
 	return m.identitiyClient
 }
 
-func (m *MockCiliumV2Client) CiliumLocalRedirectPolicies(namespace string) ciliumv2.CiliumLocalRedirectPolicyInterface {
+func (m *MockCiliumV2Client) CiliumLocalRedirectPolicies(_ string) ciliumv2.CiliumLocalRedirectPolicyInterface {
 	m.l.Warn("MockCiliumV2Client.CiliumLocalRedirectPolicies() called but this returns nil because it's not implemented")
 	return nil
 }
 
-func (m *MockCiliumV2Client) CiliumNetworkPolicies(namespace string) ciliumv2.CiliumNetworkPolicyInterface {
+func (m *MockCiliumV2Client) CiliumNetworkPolicies(_ string) ciliumv2.CiliumNetworkPolicyInterface {
 	m.l.Warn("MockCiliumV2Client.CiliumNetworkPolicies() called but this returns nil because it's not implemented")
 	return nil
 }

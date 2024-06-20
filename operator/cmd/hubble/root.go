@@ -5,7 +5,8 @@ package hubble
 
 import (
 	"context"
-	"math/rand"
+	"crypto/rand"
+	"math/big"
 	"os"
 	"path/filepath"
 	"sync"
@@ -74,7 +75,7 @@ func initEnv(vp *viper.Viper) {
 
 	// NOTE: if the flag is not provided in operator/cmd/flags.go InitGlobalFlags(), these Populate methods override
 	// the default values provided in option.Config or operatorOption.Config respectively.
-	// The values will be overriden to the "zero value".
+	// The values will be overridden to the "zero value".
 	// Maybe could create a cell.Config for these instead?
 	option.Config.Populate(vp)
 	operatorOption.Config.Populate(vp)
@@ -125,7 +126,10 @@ func runOperator(l logrus.FieldLogger, lc *LeaderLifecycle, clientset k8sClient.
 	if err != nil {
 		l.WithError(err).Fatal("Failed to get hostname when generating lease lock identity")
 	}
-	operatorID = randomStringWithPrefix(operatorID+"-", 10)
+	operatorID, err = randomStringWithPrefix(operatorID+"-", 10)
+	if err != nil {
+		l.WithError(err).Fatal("Failed to generate random string for lease lock identity")
+	}
 
 	leResourceLock, err := resourcelock.NewFromKubeconfig(
 		resourcelock.LeasesResourceLock,
@@ -181,12 +185,15 @@ func runOperator(l logrus.FieldLogger, lc *LeaderLifecycle, clientset k8sClient.
 
 // RandomStringWithPrefix returns a random string of length n + len(prefix) with
 // the given prefix, containing upper- and lowercase runes.
-// borrowed from https://stackoverflow.com/questions/22892120/how-to-generate-a-random-string-of-a-fixed-length-in-go
-func randomStringWithPrefix(prefix string, n int) string {
+func randomStringWithPrefix(prefix string, n int) (string, error) {
 	const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	bytes := make([]byte, n)
 	for i := range bytes {
-		bytes[i] = letters[rand.Intn(len(letters))]
+		num, err := rand.Int(rand.Reader, big.NewInt(int64(len(letters))))
+		if err != nil {
+			return "", err // Return an error if there's an issue generating the random number
+		}
+		bytes[i] = letters[num.Int64()]
 	}
-	return prefix + string(bytes)
+	return prefix + string(bytes), nil
 }

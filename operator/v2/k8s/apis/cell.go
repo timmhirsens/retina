@@ -58,7 +58,7 @@ type params struct {
 
 func createCRDs(p params) {
 	p.Lifecycle.Append(cell.Hook{
-		OnStart: func(ctx cell.HookContext) error {
+		OnStart: func(_ cell.HookContext) error {
 			// Register the CRDs after validating that we are running on a supported
 			// version of K8s.
 			if !p.Clientset.IsEnabled() || p.Config.SkipCRDCreation {

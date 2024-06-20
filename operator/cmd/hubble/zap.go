@@ -4,6 +4,7 @@
 package hubble
 
 import (
+	"fmt"
 	"io"
 
 	zaphook "github.com/Sytten/logrus-zap-hook"
@@ -54,16 +55,20 @@ func setupZapHook(p params) {
 		zap.String("apiserver", p.K8sCfg.Host),
 	}
 
-	log.SetupZapLogger(lOpts, persistentFields...)
+	_, err := log.SetupZapLogger(lOpts, persistentFields...)
+	if err != nil {
+		fmt.Printf("failed to setup zap logger: %v", err)
+	}
 
 	namedLogger := log.Logger().Named("retina-operator-v2")
 	namedLogger.Info("Traces telemetry initialized with zapai", zap.String("version", retinaVersion), zap.String("appInsightsID", lOpts.ApplicationInsightsID))
 
-	zapHook, err := zaphook.NewZapHook(namedLogger.Logger)
+	var hook *zaphook.ZapHook
+	hook, err = zaphook.NewZapHook(namedLogger.Logger)
 	if err != nil {
 		p.Logger.WithError(err).Error("failed to create zap hook")
 		return
 	}
 
-	logging.DefaultLogger.Hooks.Add(zapHook)
+	logging.DefaultLogger.Hooks.Add(hook)
 }

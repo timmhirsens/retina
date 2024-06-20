@@ -78,7 +78,7 @@ func customResourceDefinitionList() (map[string]*apisclient.CRDList, error) {
 
 // createCRD creates and updates a CRD.
 // It should be called on agent startup but is idempotent and safe to call again.
-func createCRD(crdVersionedName string, crdMetaName string) func(clientset apiextensionsclient.Interface) error {
+func createCRD(crdVersionedName, crdMetaName string) func(clientset apiextensionsclient.Interface) error {
 	return func(clientset apiextensionsclient.Interface) error {
 		ciliumCRD := apisclient.GetPregeneratedCRD(crdVersionedName)
 

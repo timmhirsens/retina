@@ -33,8 +33,8 @@ import (
 )
 
 const (
-	REQUEST_TIMEOUT = 15 * time.Second
-	MAX_WORKERS     = 20
+	RequestTimeout = 15 * time.Second
+	MaxWorkers     = 20
 
 	// useOwnerReferences determines whether we set the ownerReferences field on CiliumEndpoints to the Pod that it is associated with.
 	// With this, k8s will automatically delete the CiliumEndpoint when the Pod is deleted.
@@ -106,7 +106,7 @@ func registerEndpointController(p params) error {
 	return nil
 }
 
-func (r *endpointReconciler) Start(ctx cell.HookContext) error {
+func (r *endpointReconciler) Start(_ cell.HookContext) error {
 	// NOTE: we must create IdentityManager on leader election since its allocator auto-starts on creation.
 	// There is a way to disable auto-start but then there is no exposed function to simply start().
 	im, err := NewIdentityManager(r.l, r.clientset)
@@ -117,7 +117,7 @@ func (r *endpointReconciler) Start(ctx cell.HookContext) error {
 	r.identityManager = im
 
 	// making sure we have only one thread running at a time.
-	r.wp = workerpool.New(MAX_WORKERS)
+	r.wp = workerpool.New(MaxWorkers)
 
 	if err := r.wp.Submit("namespace-controller", r.runNamespaceEvents); err != nil {
 		return errors.Wrap(err, "failed to submit task to namespace workerpool")
@@ -130,7 +130,7 @@ func (r *endpointReconciler) Start(ctx cell.HookContext) error {
 	return nil
 }
 
-func (r *endpointReconciler) Stop(ctx cell.HookContext) error {
+func (r *endpointReconciler) Stop(_ cell.HookContext) error {
 	if err := r.wp.Close(); err != nil {
 		return errors.Wrap(err, "failed to stop endpoint workerpool")
 	}
@@ -173,7 +173,7 @@ func (r *endpointReconciler) run(pctx context.Context) error {
 
 func (r *endpointReconciler) runEventHandler(pctx context.Context, ev resource.Event[*slim_corev1.Pod]) error {
 	var err error
-	ctx, cancel := context.WithTimeout(pctx, REQUEST_TIMEOUT)
+	ctx, cancel := context.WithTimeout(pctx, RequestTimeout)
 	switch ev.Kind {
 	case resource.Sync:
 		// Ignore the update/
@@ -211,7 +211,7 @@ func (r *endpointReconciler) runNamespaceEvents(pctx context.Context) error {
 			}
 
 			var err error
-			ctx, cancel := context.WithTimeout(pctx, REQUEST_TIMEOUT)
+			ctx, cancel := context.WithTimeout(pctx, RequestTimeout)
 			switch ev.Kind {
 			case resource.Sync:
 				// Ignore the update/
@@ -252,11 +252,11 @@ func (r *endpointReconciler) ReconcilePodsInNamespace(ctx context.Context, names
 		}
 
 		newPEP := pod.deepCopy()
-		labels, err := r.ciliumEndpointsLabels(ctx, pod.podObj)
+		endpointsLabels, err := r.ciliumEndpointsLabels(ctx, pod.podObj)
 		if err != nil {
 			return errors.Wrap(err, "failed to get pod labels")
 		}
-		newPEP.lbls = labels
+		newPEP.lbls = endpointsLabels
 
 		r.l.Debug("upserting pod in namespace",
 			zap.String("namespace ", namespace),
@@ -305,7 +305,7 @@ func (r *endpointReconciler) reconcilePod(ctx context.Context, podKey resource.K
 	if err != nil {
 		return errors.Wrap(err, "failed to get pod labels")
 	}
-	newPEP := &podEndpoint{
+	newPEP := &PodEndpoint{
 		key:    podKey,
 		lbls:   podLabels,
 		ipv4:   pod.Status.PodIP,
@@ -350,7 +350,7 @@ func (r *endpointReconciler) handlePodDelete(ctx context.Context, n resource.Key
 
 	r.l.WithField("podKey", n.String()).Debug("deleted CiliumEndpoint")
 
-	// Identity reference count must be modified after CiliumEndpoint is successfuly deleted.
+	// Identity reference count must be modified after CiliumEndpoint is successfully deleted.
 	// Otherwise, we could decrement reference multiple times if CiliumEndpoint deletion fails and we retry this method.
 	r.identityManager.DecrementReference(ctx, pep.lbls)
 	r.store.DeletePod(n)
@@ -358,7 +358,7 @@ func (r *endpointReconciler) handlePodDelete(ctx context.Context, n resource.Key
 	return nil
 }
 
-func (r *endpointReconciler) handlePodUpsert(ctx context.Context, newPEP *podEndpoint) error {
+func (r *endpointReconciler) handlePodUpsert(ctx context.Context, newPEP *PodEndpoint) error { //nolint:gocyclo // This function is too complex and should be refactored
 	r.l.WithField("podKey", newPEP.key.String()).Trace("handling pod upsert")
 
 	oldPEP, inCache := r.store.GetPod(newPEP.key)
@@ -400,7 +400,7 @@ func (r *endpointReconciler) handlePodUpsert(ctx context.Context, newPEP *podEnd
 					"cep":    oldCEP,
 				}).Warn("CiliumEndpoint has no ipv4 address, ignoring")
 			} else {
-				oldPEP = &podEndpoint{
+				oldPEP = &PodEndpoint{
 					key:        newPEP.key,
 					endpointID: oldCEP.Status.ID,
 					ipv4:       oldCEP.Status.Networking.Addressing[0].IPV4,
@@ -505,9 +505,7 @@ func (r *endpointReconciler) handlePodUpsert(ctx context.Context, newPEP *podEnd
 				r.identityManager.DecrementReference(ctx, newPEP.lbls)
 			}
 
-			if !sameNetworking {
-				// FIXME release newly allocated endpoint ID
-			}
+			// TODO release newly allocated endpoint ID if networking not the same
 
 			return errors.Wrap(err, "failed to marshal status patch")
 		}
@@ -523,38 +521,35 @@ func (r *endpointReconciler) handlePodUpsert(ctx context.Context, newPEP *podEnd
 			// Update the pod in cache and return
 			r.store.AddPod(newPEP)
 			return nil
-		} else {
-			if shouldAllocateNewIdentity {
-				// Decrement reference for new identity.
-				// May end up incrementing reference count for this same identity again if we try to create the CEP below.
-				// No downside to decrementing reference here and then incrementing again below (will not affect API Server).
-				r.l.WithField("podKey", newPEP.key.String()).Trace("patch unsuccessful, decrementing reference for new identity")
-				r.identityManager.DecrementReference(ctx, newPEP.lbls)
-			}
-
-			if !sameNetworking {
-				// FIXME release newly allocated endpoint ID.
-				// May end up getting another endpoint ID below if we try to create the CEP below.
-				// No downside to this.
-			}
-
-			if !k8serrors.IsNotFound(err) && err != nil {
-				r.l.WithError(err).WithFields(logrus.Fields{
-					"podKey": newPEP.key.String(),
-					"pep":    newPEP,
-					"uid":    newPEP.uid,
-				}).Error("failed to patch CiliumEndpoint")
-
-				return errors.Wrap(err, "failed to patch endpoint")
-			}
-
-			r.l.WithField("podKey", newPEP.key.String()).Debug("patch unsuccessful because CiliumEndpoint is not in API Server. now creating CiliumEndpoint")
-
-			// Endpoint was not found, create it below.
-			// Make sure the pod does not exist in the cache so that we don't try to patch it again (in case of a retry after a failure below).
-			// The CEP should (eventually) not exist in the CEP store too since API Server says it does not exist.
-			r.store.DeletePod(newPEP.key)
 		}
+		if shouldAllocateNewIdentity {
+			// Decrement reference for new identity.
+			// May end up incrementing reference count for this same identity again if we try to create the CEP below.
+			// No downside to decrementing reference here and then incrementing again below (will not affect API Server).
+			r.l.WithField("podKey", newPEP.key.String()).Trace("patch unsuccessful, decrementing reference for new identity")
+			r.identityManager.DecrementReference(ctx, newPEP.lbls)
+		}
+
+		// TODO release newly allocated endpoint ID.
+		// May end up getting another endpoint ID below if we try to create the CEP below.
+		// No downside to this.
+
+		if !k8serrors.IsNotFound(err) && err != nil {
+			r.l.WithError(err).WithFields(logrus.Fields{
+				"podKey": newPEP.key.String(),
+				"pep":    newPEP,
+				"uid":    newPEP.uid,
+			}).Error("failed to patch CiliumEndpoint")
+
+			return errors.Wrap(err, "failed to patch endpoint")
+		}
+
+		r.l.WithField("podKey", newPEP.key.String()).Debug("patch unsuccessful because CiliumEndpoint is not in API Server. now creating CiliumEndpoint")
+
+		// Endpoint was not found, create it below.
+		// Make sure the pod does not exist in the cache so that we don't try to patch it again (in case of a retry after a failure below).
+		// The CEP should (eventually) not exist in the CEP store too since API Server says it does not exist.
+		r.store.DeletePod(newPEP.key)
 	}
 
 	// create CEP
@@ -642,7 +637,7 @@ func (r *endpointReconciler) reconcileNamespace(ctx context.Context, namespace *
 	return nil
 }
 
-func (r *endpointReconciler) handleNamespaceDelete(ctx context.Context, namespaceName string) error {
+func (r *endpointReconciler) handleNamespaceDelete(_ context.Context, namespaceName string) error {
 	_, ok := r.store.GetNamespace(namespaceName)
 	if !ok {
 		r.l.Debug("Adding new namespace to cache", zap.String("namespace ", namespaceName))

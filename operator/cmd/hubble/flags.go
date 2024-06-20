@@ -4,6 +4,7 @@
 package hubble
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -31,8 +32,8 @@ func InitGlobalFlags(cmd *cobra.Command, vp *viper.Viper) {
 	flags.BoolP(option.DebugArg, "D", false, "Enable debugging mode")
 	option.BindEnv(vp, option.DebugArg)
 
-	// NOTE: without this the option gets overriden from the default value to the zero value via option.Config.Populate(vp)
-	// specifically, here options.Config.AllocatorListTimeout gets overriden from the default value to 0s
+	// NOTE: without this the option gets overridden from the default value to the zero value via option.Config.Populate(vp)
+	// specifically, here options.Config.AllocatorListTimeout gets overridden from the default value to 0s
 	flags.Duration(option.AllocatorListTimeoutName, defaults.AllocatorListTimeout, "timeout to list initial allocator state")
 	// similar overriding happens for option.Config.KVstoreConnectivityTimeout
 	flags.Duration(option.KVstoreConnectivityTimeout, defaults.KVstoreConnectivityTimeout, "Time after which an incomplete kvstore operation  is considered failed")
@@ -53,13 +54,6 @@ func InitGlobalFlags(cmd *cobra.Command, vp *viper.Viper) {
 			`configmap example for syslog driver: {"syslog.level":"info","syslog.facility":"local4"}`)
 	option.BindEnv(vp, option.LogOpt)
 
-	flags.Bool(option.Version, false, "Print version information")
-	option.BindEnv(vp, option.Version)
-
-	flags.String(option.CMDRef, "", "Path to cmdref output directory")
-	flags.MarkHidden(option.CMDRef)
-	option.BindEnv(vp, option.CMDRef)
-
 	flags.Duration(operatorOption.LeaderElectionLeaseDuration, 15*time.Second,
 		"Duration that non-leader operator candidates will wait before forcing to acquire leadership")
 	option.BindEnv(vp, operatorOption.LeaderElectionLeaseDuration)
@@ -72,14 +66,10 @@ func InitGlobalFlags(cmd *cobra.Command, vp *viper.Viper) {
 		"Duration that LeaderElector clients should wait between retries of the actions")
 	option.BindEnv(vp, operatorOption.LeaderElectionRetryPeriod)
 
-	flags.Bool(option.EnableCiliumEndpointSlice, false, "If set to true, the CiliumEndpointSlice feature is enabled. If any CiliumEndpoints resources are created, updated, or deleted in the cluster, all those changes are broadcast as CiliumEndpointSlice updates to all of the Cilium agents.")
-	option.BindEnv(vp, option.EnableCiliumEndpointSlice)
-
-	flags.Duration(option.KVstoreLeaseTTL, defaults.KVstoreLeaseTTL, "Time-to-live for the KVstore lease.")
-	flags.MarkHidden(option.KVstoreLeaseTTL)
-	option.BindEnv(vp, option.KVstoreLeaseTTL)
-
-	vp.BindPFlags(flags)
+	err := vp.BindPFlags(flags)
+	if err != nil {
+		fmt.Printf("Failed to bind flags: %v\n", err)
+	}
 }
 
 const (

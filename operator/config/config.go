@@ -26,11 +26,11 @@ func GetConfig(cfgFileName string) (*OperatorConfig, error) {
 
 	viper.AutomaticEnv()
 
-	var config OperatorConfig
+	var cfg OperatorConfig
 
 	// Check pkg/config/config.go for the explanation of setting EnableRetinaEndpoint defaults to true.
 	viper.SetDefault("EnableRetinaEndpoint", true)
-	err = viper.Unmarshal(&config)
+	err = viper.Unmarshal(&cfg)
 
-	return &config, err
+	return &cfg, err
 }

@@ -35,7 +35,7 @@ func NewMockEndpointClient(l logrus.FieldLogger, namespace string, ciliumEndpoin
 	}
 }
 
-func (m *MockEndpointClient) Create(ctx context.Context, ciliumEndpoint *v2.CiliumEndpoint, opts v1.CreateOptions) (*v2.CiliumEndpoint, error) {
+func (m *MockEndpointClient) Create(_ context.Context, ciliumEndpoint *v2.CiliumEndpoint, _ v1.CreateOptions) (*v2.CiliumEndpoint, error) {
 	m.l.Info("MockEndpointClient.Create() called")
 	_, ok, err := m.ciliumEndpoints.GetByKey(resource.NewKey(ciliumEndpoint))
 	if err != nil {
@@ -49,18 +49,18 @@ func (m *MockEndpointClient) Create(ctx context.Context, ciliumEndpoint *v2.Cili
 	return ciliumEndpoint, nil
 }
 
-func (m *MockEndpointClient) Update(ctx context.Context, ciliumEndpoint *v2.CiliumEndpoint, opts v1.UpdateOptions) (*v2.CiliumEndpoint, error) {
+func (m *MockEndpointClient) Update(_ context.Context, ciliumEndpoint *v2.CiliumEndpoint, _ v1.UpdateOptions) (*v2.CiliumEndpoint, error) {
 	m.l.Info("MockEndpointClient.Update() called")
 	m.ciliumEndpoints.cache[resource.NewKey(ciliumEndpoint)] = ciliumEndpoint
 	return ciliumEndpoint, nil
 }
 
-func (m *MockEndpointClient) UpdateStatus(ctx context.Context, ciliumEndpoint *v2.CiliumEndpoint, opts v1.UpdateOptions) (*v2.CiliumEndpoint, error) {
+func (m *MockEndpointClient) UpdateStatus(_ context.Context, _ *v2.CiliumEndpoint, _ v1.UpdateOptions) (*v2.CiliumEndpoint, error) {
 	m.l.Warn("MockEndpointClient.UpdateStatus() called but this returns nil because it's not implemented")
 	return nil, ErrNotImplemented
 }
 
-func (m *MockEndpointClient) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
+func (m *MockEndpointClient) Delete(_ context.Context, name string, _ v1.DeleteOptions) error {
 	m.l.Info("MockEndpointClient.Delete() called")
 	_, ok, err := m.ciliumEndpoints.GetByKey(resource.Key{Name: name, Namespace: m.namespace})
 	if err != nil {
@@ -73,12 +73,12 @@ func (m *MockEndpointClient) Delete(ctx context.Context, name string, opts v1.De
 	return nil
 }
 
-func (m *MockEndpointClient) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
+func (m *MockEndpointClient) DeleteCollection(_ context.Context, _ v1.DeleteOptions, _ v1.ListOptions) error {
 	m.l.Warn("MockEndpointClient.DeleteCollection() called but this is not implemented")
 	return ErrNotImplemented
 }
 
-func (m *MockEndpointClient) Get(ctx context.Context, name string, opts v1.GetOptions) (*v2.CiliumEndpoint, error) {
+func (m *MockEndpointClient) Get(_ context.Context, name string, _ v1.GetOptions) (*v2.CiliumEndpoint, error) {
 	m.l.Info("MockEndpointClient.Get() called")
 	item, _, err := m.ciliumEndpoints.GetByKey(resource.Key{Name: name, Namespace: m.namespace})
 	if err != nil {
@@ -87,10 +87,10 @@ func (m *MockEndpointClient) Get(ctx context.Context, name string, opts v1.GetOp
 	return item, nil
 }
 
-func (m *MockEndpointClient) List(ctx context.Context, opts v1.ListOptions) (*v2.CiliumEndpointList, error) {
+func (m *MockEndpointClient) List(_ context.Context, _ v1.ListOptions) (*v2.CiliumEndpointList, error) {
 	m.l.Info("MockEndpointClient.List() called")
 
-	items := make([]v2.CiliumEndpoint, len(m.ciliumEndpoints.cache))
+	items := make([]v2.CiliumEndpoint, 0, len(m.ciliumEndpoints.cache))
 	for _, cep := range m.ciliumEndpoints.cache {
 		items = append(items, *cep)
 	}
@@ -98,7 +98,7 @@ func (m *MockEndpointClient) List(ctx context.Context, opts v1.ListOptions) (*v2
 	return &v2.CiliumEndpointList{Items: items}, nil
 }
 
-func (m *MockEndpointClient) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
+func (m *MockEndpointClient) Watch(_ context.Context, _ v1.ListOptions) (watch.Interface, error) {
 	m.l.Warn("MockEndpointClient.Watch() called but this returns a fake watch because it's not implemented")
 
 	// not sure if watching is important for us
@@ -107,7 +107,7 @@ func (m *MockEndpointClient) Watch(ctx context.Context, opts v1.ListOptions) (wa
 	return w, nil
 }
 
-func (m *MockEndpointClient) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v2.CiliumEndpoint, err error) {
+func (m *MockEndpointClient) Patch(_ context.Context, name string, _ types.PatchType, data []byte, _ v1.PatchOptions, _ ...string) (result *v2.CiliumEndpoint, err error) {
 	key := resource.Key{Name: name, Namespace: m.namespace}
 	cep, ok, err := m.ciliumEndpoints.GetByKey(key)
 	if err != nil {

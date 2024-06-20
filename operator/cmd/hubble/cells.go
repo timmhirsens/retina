@@ -62,7 +62,7 @@ var (
 		// start sending logs to zap telemetry (if enabled)
 		cell.Invoke(setupZapHook),
 
-		cell.Provide(func(cfg config.Config, k8sCfg *rest.Config) telemetry.Config {
+		cell.Provide(func(cfg config.Config, _ *rest.Config) telemetry.Config {
 			return telemetry.Config{
 				Component:             "retina-operator",
 				EnableTelemetry:       cfg.EnableTelemetry,
@@ -133,7 +133,7 @@ var (
 
 		cell.Provide(func(
 			daemonCfg *option.DaemonConfig,
-			operatorCfg *operatorOption.OperatorConfig,
+			_ *operatorOption.OperatorConfig,
 		) identitygc.SharedConfig {
 			return identitygc.SharedConfig{
 				IdentityAllocationMode: daemonCfg.IdentityAllocationMode,

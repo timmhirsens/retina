@@ -42,7 +42,7 @@ func (m *MockIdentityClient) GetIdentities() map[string]*v2.CiliumIdentity {
 	return m.identities
 }
 
-func (m *MockIdentityClient) Create(ctx context.Context, ciliumIdentity *v2.CiliumIdentity, opts v1.CreateOptions) (*v2.CiliumIdentity, error) {
+func (m *MockIdentityClient) Create(_ context.Context, ciliumIdentity *v2.CiliumIdentity, _ v1.CreateOptions) (*v2.CiliumIdentity, error) {
 	m.l.Info("MockIdentityClient.Create() called")
 	if _, ok := m.identities[ciliumIdentity.Name]; ok {
 		return nil, ErrAlreadyExists
@@ -52,7 +52,7 @@ func (m *MockIdentityClient) Create(ctx context.Context, ciliumIdentity *v2.Cili
 	return ciliumIdentity, nil
 }
 
-func (m *MockIdentityClient) Update(ctx context.Context, ciliumIdentity *v2.CiliumIdentity, opts v1.UpdateOptions) (*v2.CiliumIdentity, error) {
+func (m *MockIdentityClient) Update(_ context.Context, ciliumIdentity *v2.CiliumIdentity, _ v1.UpdateOptions) (*v2.CiliumIdentity, error) {
 	m.l.Info("MockIdentityClient.Update() called")
 
 	if _, ok := m.identities[ciliumIdentity.Name]; ok {
@@ -65,7 +65,7 @@ func (m *MockIdentityClient) Update(ctx context.Context, ciliumIdentity *v2.Cili
 	return ciliumIdentity, nil
 }
 
-func (m *MockIdentityClient) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
+func (m *MockIdentityClient) Delete(_ context.Context, name string, _ v1.DeleteOptions) error {
 	m.l.Info("MockIdentityClient.Delete() called")
 
 	if _, ok := m.identities[name]; ok {
@@ -78,12 +78,12 @@ func (m *MockIdentityClient) Delete(ctx context.Context, name string, opts v1.De
 	return nil
 }
 
-func (m *MockIdentityClient) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
+func (m *MockIdentityClient) DeleteCollection(_ context.Context, _ v1.DeleteOptions, _ v1.ListOptions) error {
 	m.l.Warn("MockIdentityClient.DeleteCollection() called but this is not implemented")
 	return ErrNotImplemented
 }
 
-func (m *MockIdentityClient) Get(ctx context.Context, name string, opts v1.GetOptions) (*v2.CiliumIdentity, error) {
+func (m *MockIdentityClient) Get(_ context.Context, name string, _ v1.GetOptions) (*v2.CiliumIdentity, error) {
 	m.l.Info("MockIdentityClient.Get() called")
 
 	if identity, ok := m.identities[name]; ok {
@@ -94,10 +94,10 @@ func (m *MockIdentityClient) Get(ctx context.Context, name string, opts v1.GetOp
 	return nil, ErrNotFound{}
 }
 
-func (m *MockIdentityClient) List(ctx context.Context, opts v1.ListOptions) (*v2.CiliumIdentityList, error) {
+func (m *MockIdentityClient) List(_ context.Context, _ v1.ListOptions) (*v2.CiliumIdentityList, error) {
 	m.l.Info("MockIdentityClient.List() called")
 
-	items := make([]v2.CiliumIdentity, len(m.identities))
+	items := make([]v2.CiliumIdentity, 0, len(m.identities))
 	for _, identity := range m.identities {
 		items = append(items, *identity)
 	}
@@ -105,7 +105,7 @@ func (m *MockIdentityClient) List(ctx context.Context, opts v1.ListOptions) (*v2
 	return &v2.CiliumIdentityList{Items: items}, nil
 }
 
-func (m *MockIdentityClient) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
+func (m *MockIdentityClient) Watch(_ context.Context, _ v1.ListOptions) (watch.Interface, error) {
 	m.l.Warn("MockIdentityClient.Watch() called but this returns a fake watch because it's not implemented")
 
 	// not sure if watching is important for us
@@ -114,7 +114,7 @@ func (m *MockIdentityClient) Watch(ctx context.Context, opts v1.ListOptions) (wa
 	return w, nil
 }
 
-func (m *MockIdentityClient) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v2.CiliumIdentity, err error) {
+func (m *MockIdentityClient) Patch(_ context.Context, _ string, _ types.PatchType, _ []byte, _ v1.PatchOptions, _ ...string) (result *v2.CiliumIdentity, err error) {
 	m.l.Warn("MockIdentityClient.Patch() called but this returns nil because it's not implemented")
 	return nil, ErrNotImplemented
 }

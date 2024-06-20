@@ -13,7 +13,7 @@ import (
 	"github.com/cilium/cilium/pkg/option"
 )
 
-// IdentityManager is analagous to Cilium Daemon's identity allocation.
+// IdentityManager is analogous to Cilium Daemon's identity allocation.
 // Cilium has an IPCacche holding IP to Identity mapping.
 // In IPCache.InjectLabels(), IPCacche is told of IPs which have been updated.
 // Within this function, identities are allocated/released via CachingIdentityAllocator.
@@ -34,7 +34,7 @@ type IdentityManager struct {
 type owner struct{}
 
 // UpdateIdentities is a callback when identities are updated
-func (o *owner) UpdateIdentities(added, deleted icache.IdentityCache) {
+func (o *owner) UpdateIdentities(_, _ icache.IdentityCache) {
 	// no-op
 }
 

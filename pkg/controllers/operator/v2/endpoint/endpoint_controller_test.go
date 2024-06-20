@@ -2,6 +2,7 @@ package endpointcontroller
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"testing"
 	"time"
@@ -42,9 +43,9 @@ func podTestX() (resource.Key, *v1.Pod) {
 		}
 }
 
-func createNamespace(c corev1.CoreV1Interface, name string) {
+func createNamespace(c corev1.CoreV1Interface) {
 	// Create the namespace.
-	c.Namespaces().Create(context.TODO(), &v1.Namespace{
+	err, _ := c.Namespaces().Create(context.TODO(), &v1.Namespace{
 		ObjectMeta: slim_metav1.ObjectMeta{
 			Name: "test",
 		},
@@ -54,12 +55,15 @@ func createNamespace(c corev1.CoreV1Interface, name string) {
 			APIVersion: "v1",
 		},
 	})
+	if err != nil {
+		fmt.Printf("Error creating namespace %s:\n", err)
+	}
 }
 
 func TestPodCreate(t *testing.T) {
-	r, ciliumEndpoints := newTestEndpointReconciler(t, nil)
+	r, ciliumEndpoints := newTestEndpointReconciler(t)
 
-	createNamespace(r.ciliumSlimClientSet.CoreV1(), "test")
+	createNamespace(r.ciliumSlimClientSet.CoreV1())
 	podKey, pod := podTestX()
 
 	require.NoError(t, r.ReconcilePod(context.TODO(), podKey, pod))
@@ -71,7 +75,7 @@ func TestPodCreate(t *testing.T) {
 	require.Greater(t, identityID, int64(0))
 
 	var expectedEndpointID int64 = 1 // FIXME switch to mock allocator once endpoint IDs are allocated by the operator
-	expectedCache := map[resource.Key]*podEndpoint{
+	expectedCache := map[resource.Key]*PodEndpoint{
 		key: {
 			key:        key,
 			endpointID: expectedEndpointID,
@@ -131,9 +135,9 @@ func TestPodCreate(t *testing.T) {
 }
 
 func TestPodDelete(t *testing.T) {
-	r, ciliumEndpoints := newTestEndpointReconciler(t, nil)
+	r, ciliumEndpoints := newTestEndpointReconciler(t)
 
-	createNamespace(r.ciliumSlimClientSet.CoreV1(), "test")
+	createNamespace(r.ciliumSlimClientSet.CoreV1())
 	podKey, pod := podTestX()
 
 	require.NoError(t, r.ReconcilePod(context.TODO(), podKey, pod))
@@ -143,9 +147,9 @@ func TestPodDelete(t *testing.T) {
 }
 
 func TestPodDeleteNoOp(t *testing.T) {
-	r, ciliumEndpoints := newTestEndpointReconciler(t, nil)
+	r, ciliumEndpoints := newTestEndpointReconciler(t)
 
-	createNamespace(r.ciliumSlimClientSet.CoreV1(), "test")
+	createNamespace(r.ciliumSlimClientSet.CoreV1())
 	podKey, pod := podTestX()
 	pod = nil
 
@@ -154,9 +158,9 @@ func TestPodDeleteNoOp(t *testing.T) {
 }
 
 func TestPodLabelsChanged(t *testing.T) {
-	r, ciliumEndpoints := newTestEndpointReconciler(t, nil)
+	r, ciliumEndpoints := newTestEndpointReconciler(t)
 
-	createNamespace(r.ciliumSlimClientSet.CoreV1(), "test")
+	createNamespace(r.ciliumSlimClientSet.CoreV1())
 	podKey, pod := podTestX()
 
 	require.NoError(t, r.ReconcilePod(context.TODO(), podKey, pod))
@@ -168,7 +172,7 @@ func TestPodLabelsChanged(t *testing.T) {
 	require.Greater(t, identityID, int64(0))
 
 	var expectedEndpointID int64 = 1 // FIXME switch to mock allocator once endpoint IDs are allocated by the operator
-	expectedCache := map[resource.Key]*podEndpoint{
+	expectedCache := map[resource.Key]*PodEndpoint{
 		key: {
 			key:        key,
 			endpointID: expectedEndpointID,
@@ -237,7 +241,7 @@ func TestPodLabelsChanged(t *testing.T) {
 	require.NotNil(t, pep)
 	require.NotEqual(t, identityID, pep.identityID)
 	identityID = pep.identityID
-	expectedCacheNew := map[resource.Key]*podEndpoint{
+	expectedCacheNew := map[resource.Key]*PodEndpoint{
 		key: {
 			key:        key,
 			endpointID: expectedEndpointID,
@@ -302,9 +306,9 @@ func TestPodLabelsChanged(t *testing.T) {
 }
 
 func TestPodNetworkingChanged(t *testing.T) {
-	r, ciliumEndpoints := newTestEndpointReconciler(t, nil)
+	r, ciliumEndpoints := newTestEndpointReconciler(t)
 
-	createNamespace(r.ciliumSlimClientSet.CoreV1(), "test")
+	createNamespace(r.ciliumSlimClientSet.CoreV1())
 	podKey, pod := podTestX()
 	var expectedEndpointID int64 = 1
 	require.NoError(t, r.ReconcilePod(context.TODO(), podKey, pod))
@@ -350,7 +354,7 @@ func TestPodNetworkingChanged(t *testing.T) {
 	require.True(t, ok)
 	require.NotNil(t, pep)
 	identityID = pep.identityID
-	expectedCacheNew := map[resource.Key]*podEndpoint{
+	expectedCacheNew := map[resource.Key]*PodEndpoint{
 		key: {
 			key:        key,
 			endpointID: expectedEndpointID,
@@ -417,7 +421,7 @@ func TestPodNetworkingChanged(t *testing.T) {
 	require.True(t, ok)
 	require.NotNil(t, pep)
 	identityID = pep.identityID
-	expectedCacheNew = map[resource.Key]*podEndpoint{
+	expectedCacheNew = map[resource.Key]*PodEndpoint{
 		key: {
 			key:        key,
 			endpointID: expectedEndpointID,
@@ -476,9 +480,9 @@ func TestPodNetworkingChanged(t *testing.T) {
 }
 
 func TestNamespaceDelete(t *testing.T) {
-	r, ciliumEndpoints := newTestEndpointReconciler(t, nil)
+	r, ciliumEndpoints := newTestEndpointReconciler(t)
 
-	createNamespace(r.ciliumSlimClientSet.CoreV1(), "test")
+	createNamespace(r.ciliumSlimClientSet.CoreV1())
 	podKey, pod := podTestX()
 
 	require.NoError(t, r.ReconcilePod(context.TODO(), podKey, pod))
@@ -496,9 +500,9 @@ func TestNamespaceDelete(t *testing.T) {
 }
 
 func TestNamespaceUpdate(t *testing.T) {
-	r, ciliumEndpoints := newTestEndpointReconciler(t, nil)
+	r, ciliumEndpoints := newTestEndpointReconciler(t)
 
-	createNamespace(r.ciliumSlimClientSet.CoreV1(), "test")
+	createNamespace(r.ciliumSlimClientSet.CoreV1())
 	podKey, pod := podTestX()
 
 	require.NoError(t, r.ReconcilePod(context.TODO(), podKey, pod))
@@ -545,31 +549,31 @@ func TestNamespaceUpdate(t *testing.T) {
 	require.Equal(t, expectedCEP, cep)
 }
 
-func TestUpdateFailurePodLabelsChanged(t *testing.T) {
+func TestUpdateFailurePodLabelsChanged(_ *testing.T) {
 }
 
-func TestUpdateFailurePodNetworkingChanged(t *testing.T) {
+func TestUpdateFailurePodNetworkingChanged(_ *testing.T) {
 }
 
-func TestBootupNoOp(t *testing.T) {
+func TestBootupNoOp(_ *testing.T) {
 }
 
-func TestBootupPodLabelsChanged(t *testing.T) {
+func TestBootupPodLabelsChanged(_ *testing.T) {
 }
 
-func TestBootupPodNetworkingChanged(t *testing.T) {
+func TestBootupPodNetworkingChanged(_ *testing.T) {
 }
 
-func TestBootupUpdateFailurePodLabelsChanged(t *testing.T) {
+func TestBootupUpdateFailurePodLabelsChanged(_ *testing.T) {
 }
 
-func TestBootupUpdateFailurePodNetworkingChanged(t *testing.T) {
+func TestBootupUpdateFailurePodNetworkingChanged(_ *testing.T) {
 }
 
 func TestPodWithoutIP(t *testing.T) {
-	r, ciliumEndpoints := newTestEndpointReconciler(t, nil)
+	r, ciliumEndpoints := newTestEndpointReconciler(t)
 
-	createNamespace(r.ciliumSlimClientSet.CoreV1(), "test")
+	createNamespace(r.ciliumSlimClientSet.CoreV1())
 
 	podKey, pod := podTestX()
 	pod.Status.PodIP = ""
@@ -583,19 +587,19 @@ func TestPodWithoutIP(t *testing.T) {
 }
 
 func TestStoreFailure(t *testing.T) {
-	r, ciliumEndpoints := newTestEndpointReconciler(t, nil)
+	r, ciliumEndpoints := newTestEndpointReconciler(t)
 
 	ciliumEndpoints.FailOnNextStoreCall()
 
-	createNamespace(r.ciliumSlimClientSet.CoreV1(), "test")
+	createNamespace(r.ciliumSlimClientSet.CoreV1())
 	podKey, pod := podTestX()
 	require.Error(t, r.ReconcilePod(context.TODO(), podKey, pod))
 }
 
 func TestSortedLabels(t *testing.T) {
-	r, _ := newTestEndpointReconciler(t, nil)
+	r, _ := newTestEndpointReconciler(t)
 
-	createNamespace(r.ciliumSlimClientSet.CoreV1(), "test")
+	createNamespace(r.ciliumSlimClientSet.CoreV1())
 
 	pod := cache.PodCacheObject{
 		Key: resource.Key{
@@ -661,7 +665,7 @@ func TestSortedLabels(t *testing.T) {
 	require.Equal(t, "k8s:io.cilium.k8s.policy.cluster,k8s:io.kubernetes.pod.namespace=test,k8s:k1=v1,k8s:k2=v2,k8s:k3=v3,k8s:k4=v4,k8s:k5=v5", lbls.String())
 }
 
-func newTestEndpointReconciler(t *testing.T, podEvents chan cache.PodCacheObject) (*endpointReconciler, *ciliumutil.MockResource[*ciliumv2.CiliumEndpoint]) {
+func newTestEndpointReconciler(t *testing.T) (*endpointReconciler, *ciliumutil.MockResource[*ciliumv2.CiliumEndpoint]) {
 	t.Helper()
 	l := logrus.New()
 	l.SetLevel(logrus.DebugLevel)
@@ -673,7 +677,7 @@ func newTestEndpointReconciler(t *testing.T, podEvents chan cache.PodCacheObject
 	r := &endpointReconciler{
 		l:                   l,
 		clientset:           m,
-		podEvents:           podEvents,
+		podEvents:           nil,
 		ciliumEndpoints:     ciliumEndpoints,
 		ciliumSlimClientSet: fakeClientSet.SlimFakeClientset,
 		store:               NewStore(),

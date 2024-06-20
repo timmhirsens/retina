@@ -56,11 +56,11 @@ func (r *MockResource[T]) FailOnNextStoreCall() {
 	r.shouldFailNextStoreCall = true
 }
 
-func (r *MockResource[T]) Observe(ctx context.Context, next func(resource.Event[T]), complete func(error)) {
+func (r *MockResource[T]) Observe(_ context.Context, _ func(resource.Event[T]), _ func(error)) {
 	r.l.Warn("Observe() called but this is not implemented")
 }
 
-func (r *MockResource[T]) Events(ctx context.Context, opts ...resource.EventsOpt) <-chan resource.Event[T] {
+func (r *MockResource[T]) Events(_ context.Context, _ ...resource.EventsOpt) <-chan resource.Event[T] {
 	r.l.Warn("Events() called but this returns nil because it's not implemented")
 	return nil
 }
@@ -101,12 +101,12 @@ func (r *MockResource[T]) GetByKey(key resource.Key) (item T, exists bool, err e
 	return item, false, nil
 }
 
-func (r *MockResource[T]) IndexKeys(indexName, indexedValue string) ([]string, error) {
+func (r *MockResource[T]) IndexKeys(_, _ string) ([]string, error) {
 	r.l.Warn("IndexKeys() called but this returns nil because it's not implemented")
 	return nil, nil
 }
 
-func (r *MockResource[T]) ByIndex(indexName, indexedValue string) ([]T, error) {
+func (r *MockResource[T]) ByIndex(_, _ string) ([]T, error) {
 	r.l.Warn("ByIndex() called but this returns nil because it's not implemented")
 	return nil, nil
 }
