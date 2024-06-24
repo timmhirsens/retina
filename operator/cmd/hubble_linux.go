@@ -13,8 +13,8 @@ import (
 )
 
 var (
-	h         = hive.New(hubble.Operator)
-	hubbleCmd = &cobra.Command{
+	h   = hive.New(hubble.Operator)
+	cmd = &cobra.Command{
 		Use:   "v2",
 		Short: "Start the Retina operator V2",
 		Run: func(cobraCmd *cobra.Command, _ []string) {
@@ -27,23 +27,23 @@ var (
 )
 
 func init() {
-	h.RegisterFlags(hubbleCmd.Flags())
-	hubbleCmd.AddCommand(h.Command())
+	h.RegisterFlags(cmd.Flags())
+	cmd.AddCommand(h.Command())
 
-	hubble.InitGlobalFlags(hubbleCmd, h.Viper())
+	hubble.InitGlobalFlags(cmd, h.Viper())
 
 	// Enable fallback to direct API probing to check for support of Leases in
 	// case Discovery API fails.
 	h.Viper().Set(option.K8sEnableAPIDiscovery, true)
 
-	hubbleCmd.AddCommand(
+	cmd.AddCommand(
 		hubble.MetricsCmd,
 		h.Command(),
 	)
 	// not sure where flags hooks is set
 	for _, hook := range hubble.FlagsHooks {
-		hook.RegisterProviderFlag(hubbleCmd, h.Viper())
+		hook.RegisterProviderFlag(cmd, h.Viper())
 	}
 
-	rootCmd.AddCommand(hubbleCmd)
+	rootCmd.AddCommand(cmd)
 }
