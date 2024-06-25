@@ -1,7 +1,10 @@
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// SPDX-License-Identifier: Apache-2.0
+// Copyright Authors of Cilium and Retina
 
-package hubble
+// NOTE: separated the cells from root.go into this file.
+// See other note in root.go for modification info.
+
+package ciliumcrds
 
 import (
 	"context"
@@ -12,15 +15,14 @@ import (
 	k8sruntime "k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
-	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	zapf "sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	"github.com/microsoft/retina/operator/v2/config"
-	operatorK8s "github.com/microsoft/retina/operator/v2/k8s"
-	"github.com/microsoft/retina/operator/v2/k8s/apis"
-	endpointcontroller "github.com/microsoft/retina/pkg/controllers/operator/v2/endpoint"
+	"github.com/microsoft/retina/operator/cilium-crds/config"
+	operatorK8s "github.com/microsoft/retina/operator/cilium-crds/k8s"
+	"github.com/microsoft/retina/operator/cilium-crds/k8s/apis"
+	endpointcontroller "github.com/microsoft/retina/pkg/controllers/operator/cilium-crds/endpoint"
 
 	"github.com/cilium/cilium/operator/auth"
 	"github.com/cilium/cilium/operator/endpointgc"
@@ -62,7 +64,7 @@ var (
 		// start sending logs to zap telemetry (if enabled)
 		cell.Invoke(setupZapHook),
 
-		cell.Provide(func(cfg config.Config, _ *rest.Config) telemetry.Config {
+		cell.Provide(func(cfg config.Config) telemetry.Config {
 			return telemetry.Config{
 				Component:             "retina-operator",
 				EnableTelemetry:       cfg.EnableTelemetry,

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-package hubble
+package ciliumcrds
 
 import (
 	"fmt"
@@ -16,7 +16,7 @@ import (
 	"go.uber.org/zap"
 	"k8s.io/client-go/rest"
 
-	"github.com/microsoft/retina/operator/v2/config"
+	"github.com/microsoft/retina/operator/cilium-crds/config"
 )
 
 // TODO refactor to another package? Like shared/telemetry/

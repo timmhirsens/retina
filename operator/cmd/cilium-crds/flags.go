@@ -1,14 +1,15 @@
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// SPDX-License-Identifier: Apache-2.0
+// Copyright Authors of Cilium and Retina
 
-package hubble
+// NOTE: copied and slimmed down for our use case
+
+package ciliumcrds
 
 import (
 	"fmt"
 	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 
 	operatorOption "github.com/cilium/cilium/operator/option"
@@ -70,32 +71,4 @@ func InitGlobalFlags(cmd *cobra.Command, vp *viper.Viper) {
 	if err != nil {
 		fmt.Printf("Failed to bind flags: %v\n", err)
 	}
-}
-
-const (
-	// pprofOperator enables pprof debugging endpoint for the operator
-	pprofOperator = "operator-pprof"
-
-	// pprofAddress is the port that the pprof listens on
-	pprofAddress = "operator-pprof-address"
-
-	// pprofPort is the port that the pprof listens on
-	pprofPort = "operator-pprof-port"
-)
-
-// operatorPprofConfig holds the configuration for the operator pprof cell.
-// Differently from the agent and the clustermesh-apiserver, the operator prefixes
-// the pprof related flags with the string "operator-".
-// To reuse the same cell, we need a different config type to map the same fields
-// to the operator-specific pprof flag names.
-type operatorPprofConfig struct {
-	OperatorPprof        bool
-	OperatorPprofAddress string
-	OperatorPprofPort    uint16
-}
-
-func (def operatorPprofConfig) Flags(flags *pflag.FlagSet) {
-	flags.Bool(pprofOperator, def.OperatorPprof, "Enable serving pprof debugging API")
-	flags.String(pprofAddress, def.OperatorPprofAddress, "Address that pprof listens on")
-	flags.Uint16(pprofPort, def.OperatorPprofPort, "Port that pprof listens on")
 }

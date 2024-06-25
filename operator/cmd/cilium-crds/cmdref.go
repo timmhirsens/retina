@@ -1,7 +1,9 @@
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// SPDX-License-Identifier: Apache-2.0
+// Copyright Authors of Cilium and Retina
 
-package hubble
+// NOTE: copied and modified to say retina-operator instead
+
+package ciliumcrds
 
 import (
 	"fmt"

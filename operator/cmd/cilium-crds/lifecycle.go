@@ -1,7 +1,13 @@
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// SPDX-License-Identifier: Apache-2.0
+// Copyright Authors of Cilium and Retina
 
-package hubble
+// NOTE: we could reference this file Cilium's code, but it is a small file.
+// If we were to import this code from Cilium's operator/cmd/ package,
+// that would require dependencies we don't need from their operator (for instance, BGP dependencies).
+// At time of writing, trying to import that code was also resulting in an error in go mod tidy:
+// module go.universe.tf/metallb@latest found (v0.13.12), but does not contain package go.universe.tf/metallb/pkg/speaker
+
+package ciliumcrds
 
 import (
 	"github.com/cilium/cilium/pkg/hive/cell"

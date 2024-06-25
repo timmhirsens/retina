@@ -14,7 +14,7 @@ import (
 )
 
 // podEndpoint represents a Pod/CiliumEndpoint
-type PodEndpoint struct {
+type podEndpoint struct {
 	key        resource.Key
 	endpointID int64
 	identityID int64
@@ -35,7 +35,7 @@ type PodEndpoint struct {
 	podObj *slim_corev1.Pod
 }
 
-func (pep *PodEndpoint) endpointStatus() ciliumv2.EndpointStatus {
+func (pep *podEndpoint) endpointStatus() ciliumv2.EndpointStatus {
 	return ciliumv2.EndpointStatus{
 		ID: pep.endpointID,
 		Identity: &ciliumv2.EndpointIdentity{
@@ -55,8 +55,8 @@ func (pep *PodEndpoint) endpointStatus() ciliumv2.EndpointStatus {
 	}
 }
 
-func (pep *PodEndpoint) deepCopy() *PodEndpoint {
-	return &PodEndpoint{
+func (pep *podEndpoint) deepCopy() *podEndpoint {
+	return &podEndpoint{
 		key:               pep.key,
 		endpointID:        pep.endpointID,
 		identityID:        pep.identityID,
@@ -75,7 +75,7 @@ type Store struct { //nolint:gocritic // This should be rewritten to limit expos
 	// Pods is a map of Pod key to podEndpoint
 	// this is the expected endpoint state for the pod
 	// and is used to determine if the pod needs to be updated
-	Pods map[resource.Key]*PodEndpoint
+	Pods map[resource.Key]*podEndpoint
 
 	// Namespaces is a map of Namespace name to Namespace
 	// this is used to determine if the namespace needs to be updated
@@ -85,12 +85,12 @@ type Store struct { //nolint:gocritic // This should be rewritten to limit expos
 func NewStore() *Store {
 	return &Store{
 		RWMutex:    &sync.RWMutex{},
-		Pods:       make(map[resource.Key]*PodEndpoint),
+		Pods:       make(map[resource.Key]*podEndpoint),
 		Namespaces: make(map[string]*slim_corev1.Namespace),
 	}
 }
 
-func (s *Store) AddPod(pod *PodEndpoint) {
+func (s *Store) AddPod(pod *podEndpoint) {
 	s.Lock()
 	defer s.Unlock()
 	s.Pods[pod.key] = pod
@@ -102,14 +102,14 @@ func (s *Store) AddNamespace(namespace *slim_corev1.Namespace) {
 	s.Namespaces[namespace.GetName()] = namespace
 }
 
-func (s *Store) GetPod(key resource.Key) (*PodEndpoint, bool) {
+func (s *Store) GetPod(key resource.Key) (*podEndpoint, bool) {
 	s.RLock()
 	defer s.RUnlock()
 	pod, ok := s.Pods[key]
 	return pod, ok
 }
 
-func (s *Store) GetToDeletePod(key resource.Key) (*PodEndpoint, bool) {
+func (s *Store) GetToDeletePod(key resource.Key) (*podEndpoint, bool) {
 	s.Lock()
 	defer s.Unlock()
 	pod, ok := s.Pods[key]

@@ -1,7 +1,11 @@
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// SPDX-License-Identifier: Apache-2.0
+// Copyright Authors of Cilium and Retina
 
-package hubble
+// NOTE: this file was originally a modified/slimmed-down version of Cilium's operator
+// to provide Retina with a hive to run Cilium's garbage collection Cells.
+// Now, it contains Retina-related code ported into Cells.
+
+package ciliumcrds
 
 import (
 	"context"
@@ -39,8 +43,6 @@ var (
 )
 
 func Execute(cmd *cobra.Command, h *hive.Hive) {
-	fn := option.InitConfig(cmd, "Retina-Operator", "retina-operators", h.Viper())
-	fn()
 	initEnv(h.Viper())
 
 	if err := h.Run(); err != nil {

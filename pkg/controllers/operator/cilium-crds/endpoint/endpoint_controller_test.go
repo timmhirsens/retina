@@ -15,7 +15,7 @@ import (
 	corev1 "github.com/cilium/cilium/pkg/k8s/slim/k8s/client/clientset/versioned/typed/core/v1"
 	"github.com/cilium/cilium/pkg/labels"
 	"github.com/cilium/cilium/pkg/option"
-	"github.com/microsoft/retina/pkg/controllers/operator/v2/cache"
+	"github.com/microsoft/retina/pkg/controllers/operator/cilium-crds/cache"
 	ciliumutil "github.com/microsoft/retina/pkg/utils/testutil/cilium"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
@@ -75,7 +75,7 @@ func TestPodCreate(t *testing.T) {
 	require.Greater(t, identityID, int64(0))
 
 	var expectedEndpointID int64 = 1 // FIXME switch to mock allocator once endpoint IDs are allocated by the operator
-	expectedCache := map[resource.Key]*PodEndpoint{
+	expectedCache := map[resource.Key]*podEndpoint{
 		key: {
 			key:        key,
 			endpointID: expectedEndpointID,
@@ -172,7 +172,7 @@ func TestPodLabelsChanged(t *testing.T) {
 	require.Greater(t, identityID, int64(0))
 
 	var expectedEndpointID int64 = 1 // FIXME switch to mock allocator once endpoint IDs are allocated by the operator
-	expectedCache := map[resource.Key]*PodEndpoint{
+	expectedCache := map[resource.Key]*podEndpoint{
 		key: {
 			key:        key,
 			endpointID: expectedEndpointID,
@@ -241,7 +241,7 @@ func TestPodLabelsChanged(t *testing.T) {
 	require.NotNil(t, pep)
 	require.NotEqual(t, identityID, pep.identityID)
 	identityID = pep.identityID
-	expectedCacheNew := map[resource.Key]*PodEndpoint{
+	expectedCacheNew := map[resource.Key]*podEndpoint{
 		key: {
 			key:        key,
 			endpointID: expectedEndpointID,
@@ -354,7 +354,7 @@ func TestPodNetworkingChanged(t *testing.T) {
 	require.True(t, ok)
 	require.NotNil(t, pep)
 	identityID = pep.identityID
-	expectedCacheNew := map[resource.Key]*PodEndpoint{
+	expectedCacheNew := map[resource.Key]*podEndpoint{
 		key: {
 			key:        key,
 			endpointID: expectedEndpointID,
@@ -421,7 +421,7 @@ func TestPodNetworkingChanged(t *testing.T) {
 	require.True(t, ok)
 	require.NotNil(t, pep)
 	identityID = pep.identityID
-	expectedCacheNew = map[resource.Key]*PodEndpoint{
+	expectedCacheNew = map[resource.Key]*podEndpoint{
 		key: {
 			key:        key,
 			endpointID: expectedEndpointID,

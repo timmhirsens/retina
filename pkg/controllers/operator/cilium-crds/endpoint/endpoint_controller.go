@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/microsoft/retina/pkg/controllers/operator/v2/cache"
+	"github.com/microsoft/retina/pkg/controllers/operator/cilium-crds/cache"
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -305,7 +305,7 @@ func (r *endpointReconciler) reconcilePod(ctx context.Context, podKey resource.K
 	if err != nil {
 		return errors.Wrap(err, "failed to get pod labels")
 	}
-	newPEP := &PodEndpoint{
+	newPEP := &podEndpoint{
 		key:    podKey,
 		lbls:   podLabels,
 		ipv4:   pod.Status.PodIP,
@@ -358,7 +358,7 @@ func (r *endpointReconciler) handlePodDelete(ctx context.Context, n resource.Key
 	return nil
 }
 
-func (r *endpointReconciler) handlePodUpsert(ctx context.Context, newPEP *PodEndpoint) error { //nolint:gocyclo // This function is too complex and should be refactored
+func (r *endpointReconciler) handlePodUpsert(ctx context.Context, newPEP *podEndpoint) error { //nolint:gocyclo // This function is too complex and should be refactored
 	r.l.WithField("podKey", newPEP.key.String()).Trace("handling pod upsert")
 
 	oldPEP, inCache := r.store.GetPod(newPEP.key)
@@ -400,7 +400,7 @@ func (r *endpointReconciler) handlePodUpsert(ctx context.Context, newPEP *PodEnd
 					"cep":    oldCEP,
 				}).Warn("CiliumEndpoint has no ipv4 address, ignoring")
 			} else {
-				oldPEP = &PodEndpoint{
+				oldPEP = &podEndpoint{
 					key:        newPEP.key,
 					endpointID: oldCEP.Status.ID,
 					ipv4:       oldCEP.Status.Networking.Addressing[0].IPV4,
@@ -530,7 +530,7 @@ func (r *endpointReconciler) handlePodUpsert(ctx context.Context, newPEP *PodEnd
 			r.identityManager.DecrementReference(ctx, newPEP.lbls)
 		}
 
-		// TODO release newly allocated endpoint ID.
+		// TODO if networking changed, release newly allocated endpoint ID.
 		// May end up getting another endpoint ID below if we try to create the CEP below.
 		// No downside to this.
 
