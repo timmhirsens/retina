@@ -151,7 +151,6 @@ func TestPodDeleteNoOp(t *testing.T) {
 
 	createNamespace(r.ciliumSlimClientSet.CoreV1())
 	podKey, pod := podTestX()
-	pod = nil
 
 	require.NoError(t, r.ReconcilePod(context.TODO(), podKey, pod))
 	assertCEPDoesNotExist(t, ciliumEndpoints, podKey)
@@ -493,7 +492,7 @@ func TestNamespaceDelete(t *testing.T) {
 		},
 	}))
 
-	require.Equal(t, 0, len(r.store.Namespaces))
+	require.Empty(t, r.store.Namespaces)
 	// deleting namespace does not delete the endpoint in cache.
 	// we will let pod controller delete the endpoint
 	_ = getAndAssertCEPExists(t, ciliumEndpoints, pod)

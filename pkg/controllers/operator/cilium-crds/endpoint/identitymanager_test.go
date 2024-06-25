@@ -2,7 +2,7 @@ package endpointcontroller
 
 import (
 	"context"
-	"fmt"
+	"strconv"
 	"testing"
 
 	ciliumutil "github.com/microsoft/retina/pkg/utils/testutil/cilium"
@@ -45,9 +45,9 @@ func TestGetIdentities(t *testing.T) {
 	require.Greater(t, int(id), 0)
 
 	// identity should be in API Server
-	idObj, err := m.CiliumV2().CiliumIdentities().Get(context.TODO(), fmt.Sprint(id), metav1.GetOptions{})
+	idObj, err := m.CiliumV2().CiliumIdentities().Get(context.TODO(), strconv.FormatInt(id, 10), metav1.GetOptions{})
 	require.NoError(t, err)
-	require.Equal(t, fmt.Sprint(id), idObj.Name)
+	require.Equal(t, strconv.FormatInt(id, 10), idObj.Name)
 	idLabels := map[string]string{
 		"k1":                          "v1",
 		"io.kubernetes.pod.namespace": "x",
@@ -88,9 +88,9 @@ func TestGetIdentities(t *testing.T) {
 	require.Greater(t, int(id), 0)
 
 	// identity should be in API Server
-	idObj, err = m.CiliumV2().CiliumIdentities().Get(context.TODO(), fmt.Sprint(id3), metav1.GetOptions{})
+	idObj, err = m.CiliumV2().CiliumIdentities().Get(context.TODO(), strconv.FormatInt(id3, 10), metav1.GetOptions{})
 	require.NoError(t, err)
-	require.Equal(t, fmt.Sprint(id3), idObj.Name)
+	require.Equal(t, strconv.FormatInt(id3, 10), idObj.Name)
 	idLabels = map[string]string{
 		"k1":                          "v1",
 		"k2":                          "v2",
@@ -131,12 +131,12 @@ func TestDecrementReference(t *testing.T) {
 
 	// no more references. identity should be deleted
 	im.DecrementReference(context.TODO(), lbls)
-	require.Len(t, im.labelIdentities, 0)
+	require.Empty(t, im.labelIdentities)
 
 	// IdentityManager's allocator should not delete the identity (identitygc cell does garbage collection)
-	idObj, err := m.CiliumV2().CiliumIdentities().Get(context.TODO(), fmt.Sprint(id), metav1.GetOptions{})
+	idObj, err := m.CiliumV2().CiliumIdentities().Get(context.TODO(), strconv.FormatInt(id, 10), metav1.GetOptions{})
 	require.NoError(t, err)
-	require.Equal(t, fmt.Sprint(id), idObj.Name)
+	require.Equal(t, strconv.FormatInt(id, 10), idObj.Name)
 	idLabels := map[string]string{
 		"k1":                          "v1",
 		"io.kubernetes.pod.namespace": "x",

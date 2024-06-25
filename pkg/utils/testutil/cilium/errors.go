@@ -12,6 +12,8 @@ var (
 	ErrNotImplemented = errors.New("not implemented")
 )
 
+const ErrCodeNotFound = 404
+
 type ErrNotFound struct{}
 
 func (e ErrNotFound) Error() string {
@@ -21,6 +23,6 @@ func (e ErrNotFound) Error() string {
 func (e ErrNotFound) Status() v1.Status {
 	return v1.Status{
 		Reason: v1.StatusReasonNotFound,
-		Code:   404,
+		Code:   ErrCodeNotFound,
 	}
 }

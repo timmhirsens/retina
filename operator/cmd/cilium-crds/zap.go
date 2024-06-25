@@ -23,6 +23,12 @@ import (
 
 const logFileName = "retina-operator.log"
 
+var (
+	MaxFileSizeMB = 100
+	MaxBackups    = 3
+	MaxAgeDays    = 30
+)
+
 type params struct {
 	cell.In
 
@@ -43,9 +49,9 @@ func setupZapHook(p params) {
 		Level:                 p.DaemonCfg.LogOpt[logging.LevelOpt],
 		File:                  false,
 		FileName:              logFileName,
-		MaxFileSizeMB:         100,
-		MaxBackups:            3,
-		MaxAgeDays:            30,
+		MaxFileSizeMB:         MaxFileSizeMB,
+		MaxBackups:            MaxBackups,
+		MaxAgeDays:            MaxAgeDays,
 		ApplicationInsightsID: applicationInsightsID,
 		EnableTelemetry:       p.OperatorCfg.EnableTelemetry,
 	}

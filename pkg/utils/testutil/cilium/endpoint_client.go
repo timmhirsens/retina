@@ -5,6 +5,7 @@ package ciliumutil
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/sirupsen/logrus"
 
@@ -121,7 +122,7 @@ func (m *MockEndpointClient) Patch(_ context.Context, name string, _ types.Patch
 	var replaceCEPStatus []JSONPatch
 	err = json.Unmarshal(data, &replaceCEPStatus)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal patch data: %w", err)
 	}
 
 	cep.Status = replaceCEPStatus[0].Value

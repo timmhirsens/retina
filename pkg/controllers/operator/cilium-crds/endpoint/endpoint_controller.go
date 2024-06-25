@@ -6,7 +6,6 @@ package endpointcontroller
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"reflect"
 	"sync"
 	"time"
@@ -632,7 +631,7 @@ func (r *endpointReconciler) reconcileNamespace(ctx context.Context, namespace *
 	// now get all pods and update them as well
 	err := r.ReconcilePodsInNamespace(ctx, namespace.GetName())
 	if err != nil {
-		return errors.Wrap(err, fmt.Sprintf("failed to reconcile pods in namespace %s", namespace.GetName()))
+		return errors.Wrap(err, "failed to reconcile pods in namespace"+namespace.GetName())
 	}
 	return nil
 }

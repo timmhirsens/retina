@@ -30,10 +30,19 @@ var necessaryCRDNames = []string{
 	synced.CRDResourceName(k8sconstv2.CIDName),
 }
 
+// Define a custom error type for missing CRDs
+type CRDNotFoundError struct {
+	CRDName string
+}
+
+func (e *CRDNotFoundError) Error() string {
+	return "CRD not found: " + e.CRDName
+}
+
 // RegisterCRDs registers all CRDs with the K8s apiserver.
 func RegisterCRDs(clientset client.Clientset) error {
 	if err := createCustomResourceDefinitions(clientset); err != nil {
-		return fmt.Errorf("Unable to create custom resource definition: %s", err)
+		return fmt.Errorf("Unable to create custom resource definition: %w", err)
 	}
 
 	return nil
@@ -46,7 +55,7 @@ func createCustomResourceDefinitions(clientset apiextensionsclient.Interface) er
 
 	crds, err := customResourceDefinitionList()
 	if err != nil {
-		return err
+		return fmt.Errorf("Unable to get CRD list: %w", err)
 	}
 
 	for _, crd := range crds {
@@ -56,7 +65,7 @@ func createCustomResourceDefinitions(clientset apiextensionsclient.Interface) er
 		})
 	}
 
-	return g.Wait()
+	return fmt.Errorf("Unable to create CRD: %w", g.Wait())
 }
 
 func customResourceDefinitionList() (map[string]*apisclient.CRDList, error) {
@@ -67,7 +76,7 @@ func customResourceDefinitionList() (map[string]*apisclient.CRDList, error) {
 	for _, crdName := range necessaryCRDNames {
 		crd, ok := crds[crdName]
 		if !ok {
-			return nil, fmt.Errorf("CRD not found: %s", crdName)
+			return nil, fmt.Errorf("%w", &CRDNotFoundError{CRDName: crdName})
 		}
 
 		necessaryCRDs[crdName] = crd

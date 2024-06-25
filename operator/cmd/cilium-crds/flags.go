@@ -17,6 +17,12 @@ import (
 	"github.com/cilium/cilium/pkg/option"
 )
 
+var (
+	durationLeaderElector     = 2 * time.Second
+	durationNonLeaderOperator = 15 * time.Second
+	durationActingMaster      = 10 * time.Second
+)
+
 func InitGlobalFlags(cmd *cobra.Command, vp *viper.Viper) {
 	flags := cmd.Flags()
 
@@ -55,15 +61,15 @@ func InitGlobalFlags(cmd *cobra.Command, vp *viper.Viper) {
 			`configmap example for syslog driver: {"syslog.level":"info","syslog.facility":"local4"}`)
 	option.BindEnv(vp, option.LogOpt)
 
-	flags.Duration(operatorOption.LeaderElectionLeaseDuration, 15*time.Second,
+	flags.Duration(operatorOption.LeaderElectionLeaseDuration, durationNonLeaderOperator,
 		"Duration that non-leader operator candidates will wait before forcing to acquire leadership")
 	option.BindEnv(vp, operatorOption.LeaderElectionLeaseDuration)
 
-	flags.Duration(operatorOption.LeaderElectionRenewDeadline, 10*time.Second,
+	flags.Duration(operatorOption.LeaderElectionRenewDeadline, durationActingMaster,
 		"Duration that current acting master will retry refreshing leadership in before giving up the lock")
 	option.BindEnv(vp, operatorOption.LeaderElectionRenewDeadline)
 
-	flags.Duration(operatorOption.LeaderElectionRetryPeriod, 2*time.Second,
+	flags.Duration(operatorOption.LeaderElectionRetryPeriod, durationLeaderElector,
 		"Duration that LeaderElector clients should wait between retries of the actions")
 	option.BindEnv(vp, operatorOption.LeaderElectionRetryPeriod)
 

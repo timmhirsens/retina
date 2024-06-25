@@ -1,6 +1,8 @@
 package config
 
 import (
+	"fmt"
+
 	"github.com/microsoft/retina/pkg/config"
 	"github.com/spf13/viper"
 )
@@ -21,7 +23,7 @@ func GetConfig(cfgFileName string) (*OperatorConfig, error) {
 	viper.SetConfigFile(cfgFileName)
 	err := viper.ReadInConfig()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error reading config file: %w", err)
 	}
 
 	viper.AutomaticEnv()
@@ -30,5 +32,5 @@ func GetConfig(cfgFileName string) (*OperatorConfig, error) {
 	viper.SetDefault("EnableRetinaEndpoint", true)
 	err = viper.Unmarshal(&cfg)
 
-	return &cfg, err
+	return &cfg, fmt.Errorf("error unmarshalling config: %w", err)
 }

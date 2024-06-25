@@ -10,6 +10,7 @@ package ciliumcrds
 import (
 	"context"
 	"crypto/rand"
+	"fmt"
 	"math/big"
 	"os"
 	"path/filepath"
@@ -38,8 +39,9 @@ var (
 	retinaVersion         string
 
 	// set logger field: subsys=retina-operator
-	binaryName = filepath.Base(os.Args[0])
-	logger     = logging.DefaultLogger.WithField(logfields.LogSubsys, binaryName)
+	binaryName       = filepath.Base(os.Args[0])
+	logger           = logging.DefaultLogger.WithField(logfields.LogSubsys, binaryName)
+	operatorIdLength = 10
 )
 
 func Execute(cmd *cobra.Command, h *hive.Hive) {
@@ -128,7 +130,7 @@ func runOperator(l logrus.FieldLogger, lc *LeaderLifecycle, clientset k8sClient.
 	if err != nil {
 		l.WithError(err).Fatal("Failed to get hostname when generating lease lock identity")
 	}
-	operatorID, err = randomStringWithPrefix(operatorID+"-", 10)
+	operatorID, err = randomStringWithPrefix(operatorID+"-", operatorIdLength)
 	if err != nil {
 		l.WithError(err).Fatal("Failed to generate random string for lease lock identity")
 	}
@@ -193,7 +195,7 @@ func randomStringWithPrefix(prefix string, n int) (string, error) {
 	for i := range bytes {
 		num, err := rand.Int(rand.Reader, big.NewInt(int64(len(letters))))
 		if err != nil {
-			return "", err // Return an error if there's an issue generating the random number
+			return "", fmt.Errorf("failed to generate random number: %w", err)
 		}
 		bytes[i] = letters[num.Int64()]
 	}

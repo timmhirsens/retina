@@ -50,6 +50,12 @@ var (
 	MaxTracesConfigurationChannelBuffer  = 50
 	MaxRetinaEndpointChannelBuffer       = 250
 
+	MaxFileSizeMB = 100
+	MaxBackups    = 3
+	MaxAgeDays    = 30
+
+	HeartbeatFrequency = 5 * time.Minute
+
 	version = "undefined"
 
 	// applicationInsightsID is the instrumentation key for Azure Application Insights
@@ -242,7 +248,7 @@ func (o *Operator) Start() {
 	}
 
 	// start heartbeat goroutine for application insights
-	go tel.Heartbeat(ctx, 5*time.Minute)
+	go tel.Heartbeat(ctx, HeartbeatFrequency)
 }
 
 func EnablePProf() {
@@ -263,9 +269,9 @@ func initLogging(cfg *config.OperatorConfig, applicationInsightsID string) error
 	logOpts := &log.LogOpts{
 		Level:                 cfg.LogLevel,
 		File:                  false,
-		MaxFileSizeMB:         100,
-		MaxBackups:            3,
-		MaxAgeDays:            30,
+		MaxFileSizeMB:         MaxFileSizeMB,
+		MaxBackups:            MaxBackups,
+		MaxAgeDays:            MaxAgeDays,
 		ApplicationInsightsID: applicationInsightsID,
 		EnableTelemetry:       cfg.EnableTelemetry,
 	}
@@ -273,7 +279,7 @@ func initLogging(cfg *config.OperatorConfig, applicationInsightsID string) error
 	_, err := log.SetupZapLogger(logOpts)
 	if err != nil {
 		mainLogger.Error("Failed to setup zap logger", zap.Error(err))
-		return err
+		return fmt.Errorf("failed to setup zap logger: %w", err)
 	}
 
 	return nil
