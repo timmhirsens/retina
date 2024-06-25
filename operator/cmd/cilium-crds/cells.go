@@ -8,6 +8,7 @@ package ciliumcrds
 
 import (
 	"context"
+	"fmt"
 	"sync/atomic"
 
 	"github.com/microsoft/retina/pkg/shared/telemetry"
@@ -119,7 +120,13 @@ var (
 		"Operator Control Plane",
 
 		cell.Config(cmtypes.DefaultClusterInfo),
-		cell.Invoke(func(cinfo cmtypes.ClusterInfo) error { return cinfo.Validate() }),
+		cell.Invoke(func(cinfo cmtypes.ClusterInfo) error {
+			err := cinfo.Validate()
+			if err != nil {
+				return fmt.Errorf("error validating cluster info: %w", err)
+			}
+			return nil
+		}),
 
 		cell.Invoke(
 			registerOperatorHooks,
@@ -182,7 +189,8 @@ var (
 			cell.Provide(func(scheme *k8sruntime.Scheme) (ctrl.Manager, error) {
 				// controller-runtime requires its own logger
 				logf.SetLogger(zapf.New())
-				return ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
+
+				manager, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 					Scheme: scheme,
 					// Metrics: server.Options{
 					// 	BindAddress: metricsAddr,
@@ -192,6 +200,10 @@ var (
 					// Port:                   9443,
 					// HealthProbeBindAddress: probeAddr,
 				})
+				if err != nil {
+					return nil, fmt.Errorf("failed to create manager: %w", err)
+				}
+				return manager, nil
 			}),
 			endpointcontroller.Cell,
 

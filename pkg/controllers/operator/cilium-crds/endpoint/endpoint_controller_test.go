@@ -150,10 +150,9 @@ func TestPodDeleteNoOp(t *testing.T) {
 	r, ciliumEndpoints := newTestEndpointReconciler(t)
 
 	createNamespace(r.ciliumSlimClientSet.CoreV1())
-	podKey, pod := podTestX()
+	podKey, _ := podTestX()
 
-	require.NoError(t, r.ReconcilePod(context.TODO(), podKey, pod))
-	pod = nil
+	require.NoError(t, r.ReconcilePod(context.TODO(), podKey, nil))
 	assertCEPDoesNotExist(t, ciliumEndpoints, podKey)
 }
 

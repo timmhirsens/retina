@@ -91,13 +91,17 @@ func createCRD(crdVersionedName, crdMetaName string) func(clientset apiextension
 	return func(clientset apiextensionsclient.Interface) error {
 		ciliumCRD := apisclient.GetPregeneratedCRD(crdVersionedName)
 
-		return crdhelpers.CreateUpdateCRD(
+		err := crdhelpers.CreateUpdateCRD(
 			clientset,
 			constructV1CRD(crdMetaName, ciliumCRD),
 			crdhelpers.NewDefaultPoller(),
 			k8sconst.CustomResourceDefinitionSchemaVersionKey,
 			versioncheck.MustVersion(k8sconst.CustomResourceDefinitionSchemaVersion),
 		)
+		if err != nil {
+			return fmt.Errorf("Unable to create CRD %s: %w", crdMetaName, err)
+		}
+		return nil
 	}
 }
 

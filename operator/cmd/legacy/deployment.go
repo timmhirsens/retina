@@ -17,6 +17,7 @@ import (
 	// to ensure that exec-entrypoint and run can make use of them.
 
 	"go.uber.org/zap"
+	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	apiextv1 "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/typed/apiextensions/v1"
 	k8sruntime "k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -155,7 +156,9 @@ func (o *Operator) Start() {
 
 	if oconfig.InstallCRDs {
 		mainLogger.Sugar().Infof("Installing CRDs")
-		crds, err := deploy.InstallOrUpdateCRDs(ctx, oconfig.EnableRetinaEndpoint, clientset)
+
+		var crds map[string]*v1.CustomResourceDefinition
+		crds, err = deploy.InstallOrUpdateCRDs(ctx, oconfig.EnableRetinaEndpoint, clientset)
 		if err != nil {
 			mainLogger.Error("unable to register CRDs", zap.Error(err))
 			os.Exit(1)

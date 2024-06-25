@@ -21,6 +21,8 @@ import (
 	"github.com/cilium/cilium/pkg/k8s/utils"
 )
 
+var ErrNotACiliumEndpoint = errors.New("object is not a *cilium_api_v2.CiliumEndpoint")
+
 func CiliumEndpointResource(lc cell.Lifecycle, cs client.Clientset, opts ...func(*metav1.ListOptions)) (resource.Resource[*cilium_api_v2.CiliumEndpoint], error) {
 	if !cs.IsEnabled() {
 		return nil, nil
@@ -45,7 +47,7 @@ func identityIndexFunc(obj interface{}) ([]string, error) {
 		}
 		return []string{"0"}, nil
 	}
-	return nil, fmt.Errorf("%w - found %T", errors.New("object is not a *cilium_api_v2.CiliumEndpoint"), obj)
+	return nil, fmt.Errorf("%w - found %T", ErrNotACiliumEndpoint, obj)
 }
 
 func CiliumEndpointSliceResource(lc cell.Lifecycle, cs client.Clientset, opts ...func(*metav1.ListOptions)) (resource.Resource[*cilium_api_v2alpha1.CiliumEndpointSlice], error) {
