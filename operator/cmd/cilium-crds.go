@@ -19,7 +19,7 @@ var (
 		Short: "Start the Retina operator for Hubble control plane",
 		Run: func(cobraCmd *cobra.Command, _ []string) {
 			fmt.Println("Starting Retina Operator with Cilium CRDs")
-			ciliumcrds.Execute(cobraCmd, h)
+			ciliumcrds.Execute(h)
 		},
 	}
 )

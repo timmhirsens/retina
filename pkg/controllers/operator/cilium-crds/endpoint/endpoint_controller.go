@@ -63,7 +63,7 @@ type endpointReconciler struct {
 	identityManager *IdentityManager
 
 	// store of processed pods and namespaces
-	// processedPodCache map in store pod key to podEndpoint.
+	// processedPodCache map in store pod key to PodEndpoint.
 	// It contains only pods which we have processed via Pod events.
 	// It contains endpoint goal state, and is independent of ciliumEndpoints store.
 	// When endpointReconciler is leading, all endpoint state should be in API Server.
@@ -304,7 +304,7 @@ func (r *endpointReconciler) reconcilePod(ctx context.Context, podKey resource.K
 	if err != nil {
 		return errors.Wrap(err, "failed to get pod labels")
 	}
-	newPEP := &podEndpoint{
+	newPEP := &PodEndpoint{
 		key:    podKey,
 		lbls:   podLabels,
 		ipv4:   pod.Status.PodIP,
@@ -357,7 +357,7 @@ func (r *endpointReconciler) handlePodDelete(ctx context.Context, n resource.Key
 	return nil
 }
 
-func (r *endpointReconciler) handlePodUpsert(ctx context.Context, newPEP *podEndpoint) error { //nolint:gocyclo // This function is too complex and should be refactored
+func (r *endpointReconciler) handlePodUpsert(ctx context.Context, newPEP *PodEndpoint) error { //nolint:gocyclo // This function is too complex and should be refactored
 	r.l.WithField("podKey", newPEP.key.String()).Trace("handling pod upsert")
 
 	oldPEP, inCache := r.store.GetPod(newPEP.key)
@@ -366,7 +366,7 @@ func (r *endpointReconciler) handlePodUpsert(ctx context.Context, newPEP *podEnd
 		r.l.WithFields(logrus.Fields{
 			"podKey": newPEP.key.String(),
 			"pep":    oldPEP,
-		}).Trace("podEndpoint found in cache")
+		}).Trace("PodEndpoint found in cache")
 	} else {
 		// this call will block until the store is synced with API Server
 		store, err := r.ciliumEndpoints.Store(ctx)
@@ -399,7 +399,7 @@ func (r *endpointReconciler) handlePodUpsert(ctx context.Context, newPEP *podEnd
 					"cep":    oldCEP,
 				}).Warn("CiliumEndpoint has no ipv4 address, ignoring")
 			} else {
-				oldPEP = &podEndpoint{
+				oldPEP = &PodEndpoint{
 					key:        newPEP.key,
 					endpointID: oldCEP.Status.ID,
 					ipv4:       oldCEP.Status.Networking.Addressing[0].IPV4,

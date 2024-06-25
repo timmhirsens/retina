@@ -75,7 +75,7 @@ func TestPodCreate(t *testing.T) {
 	require.Greater(t, identityID, int64(0))
 
 	var expectedEndpointID int64 = 1 // FIXME switch to mock allocator once endpoint IDs are allocated by the operator
-	expectedCache := map[resource.Key]*podEndpoint{
+	expectedCache := map[resource.Key]*PodEndpoint{
 		key: {
 			key:        key,
 			endpointID: expectedEndpointID,
@@ -153,6 +153,7 @@ func TestPodDeleteNoOp(t *testing.T) {
 	podKey, pod := podTestX()
 
 	require.NoError(t, r.ReconcilePod(context.TODO(), podKey, pod))
+	pod = nil
 	assertCEPDoesNotExist(t, ciliumEndpoints, podKey)
 }
 
@@ -171,7 +172,7 @@ func TestPodLabelsChanged(t *testing.T) {
 	require.Greater(t, identityID, int64(0))
 
 	var expectedEndpointID int64 = 1 // FIXME switch to mock allocator once endpoint IDs are allocated by the operator
-	expectedCache := map[resource.Key]*podEndpoint{
+	expectedCache := map[resource.Key]*PodEndpoint{
 		key: {
 			key:        key,
 			endpointID: expectedEndpointID,
@@ -240,7 +241,7 @@ func TestPodLabelsChanged(t *testing.T) {
 	require.NotNil(t, pep)
 	require.NotEqual(t, identityID, pep.identityID)
 	identityID = pep.identityID
-	expectedCacheNew := map[resource.Key]*podEndpoint{
+	expectedCacheNew := map[resource.Key]*PodEndpoint{
 		key: {
 			key:        key,
 			endpointID: expectedEndpointID,
@@ -353,7 +354,7 @@ func TestPodNetworkingChanged(t *testing.T) {
 	require.True(t, ok)
 	require.NotNil(t, pep)
 	identityID = pep.identityID
-	expectedCacheNew := map[resource.Key]*podEndpoint{
+	expectedCacheNew := map[resource.Key]*PodEndpoint{
 		key: {
 			key:        key,
 			endpointID: expectedEndpointID,
@@ -420,7 +421,7 @@ func TestPodNetworkingChanged(t *testing.T) {
 	require.True(t, ok)
 	require.NotNil(t, pep)
 	identityID = pep.identityID
-	expectedCacheNew = map[resource.Key]*podEndpoint{
+	expectedCacheNew = map[resource.Key]*PodEndpoint{
 		key: {
 			key:        key,
 			endpointID: expectedEndpointID,

@@ -27,7 +27,6 @@ import (
 	"github.com/cilium/cilium/pkg/option"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"k8s.io/client-go/tools/leaderelection"
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
@@ -41,10 +40,10 @@ var (
 	// set logger field: subsys=retina-operator
 	binaryName       = filepath.Base(os.Args[0])
 	logger           = logging.DefaultLogger.WithField(logfields.LogSubsys, binaryName)
-	operatorIdLength = 10
+	operatorIDLength = 10
 )
 
-func Execute(cmd *cobra.Command, h *hive.Hive) {
+func Execute(h *hive.Hive) {
 	initEnv(h.Viper())
 
 	if err := h.Run(); err != nil {
@@ -130,7 +129,7 @@ func runOperator(l logrus.FieldLogger, lc *LeaderLifecycle, clientset k8sClient.
 	if err != nil {
 		l.WithError(err).Fatal("Failed to get hostname when generating lease lock identity")
 	}
-	operatorID, err = randomStringWithPrefix(operatorID+"-", operatorIdLength)
+	operatorID, err = randomStringWithPrefix(operatorID+"-", operatorIDLength)
 	if err != nil {
 		l.WithError(err).Fatal("Failed to generate random string for lease lock identity")
 	}
