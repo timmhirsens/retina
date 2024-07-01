@@ -5,6 +5,7 @@ package main
 
 import "github.com/microsoft/retina/operator/cmd"
 
+
 func main() {
 	cmd.Execute()
 }

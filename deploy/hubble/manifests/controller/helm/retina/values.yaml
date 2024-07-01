@@ -39,13 +39,15 @@ agent:
     enabled: true
     name: retina-agent-init
     repository: ghcr.io/microsoft/retina/retina-init
+
     tag: "latest"
   pullPolicy: Always
   container:
     retina:
       command:
-        - "/controller"
+        - "/retina/controller"
       args:
+        - "hubble-control-plane"
         - "--config-dir"
         - "/retina/config"
       healthProbeBindAddress: ":18081"
