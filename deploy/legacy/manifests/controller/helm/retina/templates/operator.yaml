@@ -54,7 +54,7 @@ spec:
           name: retina-operator
           {{- if .Values.operator.container.command }}
           command:
-          {{- range Values.operator.container.command }}
+          {{- range .Values.operator.container.command }}
           - {{ . }}
           {{- end }}
           {{- end }}

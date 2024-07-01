@@ -90,7 +90,7 @@ func NewOperator(metricsAddr, probeAddr, configFile string, enableLeaderElection
 func (o *Operator) Start() {
 	mainLogger = log.Logger().Named("main")
 
-	mainLogger.Sugar().Infof("Starting legacy operator %s", version)
+	mainLogger.Sugar().Infof("Starting legacy operator")
 
 	opts := &crzap.Options{
 		Development: false,
@@ -99,7 +99,8 @@ func (o *Operator) Start() {
 	var err error
 	oconfig, err = config.GetConfig(o.configFile)
 	if err != nil {
-		panic(err)
+		fmt.Printf("failed to load config with err %s", err.Error())
+		os.Exit(1)
 	}
 
 	mainLogger.Sugar().Infof("Operator configuration", zap.Any("configuration", oconfig))

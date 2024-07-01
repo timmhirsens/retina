@@ -31,6 +31,9 @@ func GetConfig(cfgFileName string) (*OperatorConfig, error) {
 	var cfg OperatorConfig
 	viper.SetDefault("EnableRetinaEndpoint", true)
 	err = viper.Unmarshal(&cfg)
+	if err != nil {
+		return nil, fmt.Errorf("error unmarshalling config: %w", err)
+	}
 
-	return &cfg, fmt.Errorf("error unmarshalling config: %w", err)
+	return &cfg, nil
 }

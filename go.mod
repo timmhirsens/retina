@@ -66,7 +66,6 @@ require (
 	github.com/containernetworking/cni v1.1.2 // indirect
 	github.com/coreos/go-semver v0.3.1 // indirect
 	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
-	github.com/cpuguy83/go-md2man/v2 v2.0.4 // indirect
 	github.com/cyphar/filepath-securejoin v0.2.4 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/distribution/reference v0.6.0 // indirect
@@ -191,7 +190,7 @@ require (
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
 	github.com/spiffe/go-spiffe/v2 v2.2.0 // indirect
-	github.com/spiffe/spire-api-sdk v1.8.5 // indirect
+	github.com/spiffe/spire-api-sdk v1.9.1 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/syndtr/gocapability v0.0.0-20200815063812-42c35b437635 // indirect
 	github.com/tidwall/gjson v1.17.1 // indirect
@@ -203,7 +202,6 @@ require (
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
 	github.com/xlab/treeprint v1.2.0 // indirect
-	github.com/yusufpapurcu/wmi v1.2.3 // indirect
 	github.com/zeebo/errs v1.3.0 // indirect
 	go.etcd.io/etcd/api/v3 v3.5.12 // indirect
 	go.etcd.io/etcd/client/pkg/v3 v3.5.12 // indirect
@@ -290,7 +288,6 @@ require (
 	github.com/cilium/workerpool v1.2.0
 	github.com/florianl/go-tc v0.4.3
 	github.com/go-logr/zapr v1.3.0
-	github.com/golang/mock v1.1.1
 	github.com/google/gopacket v1.1.19
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/inspektor-gadget/inspektor-gadget v0.27.0
@@ -301,7 +298,6 @@ require (
 	github.com/onsi/gomega v1.33.1
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_model v0.6.1
-	github.com/sirupsen/logrus v1.9.3
 	github.com/prometheus/common v0.55.0
 	github.com/safchain/ethtool v0.4.1
 	github.com/sirupsen/logrus v1.9.3
